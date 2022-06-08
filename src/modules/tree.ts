@@ -6,20 +6,22 @@ export interface Data {
   name: string;
   type: DataType
 }
+type key = string | number;
+
 export interface TreeModelObserver {
-  onAdd(parentNodeKey:  number, key: number, value: Data): void;
-  onInit(key: number): void;
-  onMove(parentNodeKey: number, key: number): void;
+  onAdd(parentNodeKey:  key, key: key, value: Data): void;
+  onInit(key: key): void;
+  onMove(parentNodeKey: key, key: key): void;
   // onUpdate(key: number, value: Data): void;
-  onRemove(key: number): void;
+  onRemove(key: key): void;
 }
 class TreeNode {
-  key: number;
-  value: number;
+  key: key;
+  value: any;
   parent: TreeNode | null;
   children: Array<TreeNode>;
 
-  constructor(key: number, value = key, parent: ParentNode = null) {
+  constructor(key: key, value = key, parent: ParentNode = null) {
     this.key = key;
     this.value = value;
     this.parent = parent;
@@ -64,7 +66,7 @@ export default class Tree {
     yield node;
   }
 
-  insert(parentNodeKey : number, key : number, value: any = key) {
+  insert(parentNodeKey : key , key : key, value: any = key) {
     for (let node of this.preOrderTraversal()) {
       if (node.key === parentNodeKey) {
         node.children.push(new TreeNode(key, value, node));
@@ -75,7 +77,7 @@ export default class Tree {
     return false;
   }
 
-  remove(key: number) {
+  remove(key: key) {
     for (let node of this.preOrderTraversal()) {
       const filtered = node.children.filter((c: Node) => c.key !== key);
       if (filtered.length !== node.children.length) {
@@ -87,18 +89,18 @@ export default class Tree {
     return false;
   }
 
-  find(key: number) {
+  find(key: key) {
     for (let node of this.preOrderTraversal()) {
-      if (node.key === key) return node;
+      if (node.key == key) return node;
     }
     return undefined;
   }
 
-  move(newParentKey: number, key: number) {
+  move(newParentKey: key, key: key) {
     const node = this.find(key);
     const parent = this.find(newParentKey);
     if (!node || !parent) { return false; }
-    node.parent!.children = node.parent!.children.filter((c: Node) => c.key !== key);
+    node.parent!.children = node.parent!.children.filter((c: Node) => c.key != key);
     node.parent = parent;
     parent.children.push(node);
     this.#client?.onMove(parent.key, node.key);

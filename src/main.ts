@@ -120,13 +120,13 @@ const firstLoad = (): void => {
 
 window.addEventListener('hashchange', setOverlay);
 window.addEventListener('load', firstLoad);
+document.body.addEventListener('submit', e => e.preventDefault(), {capture: true});
 
 
 // Navigation
 
 const modeCtrl = new ModeModel(new class {
   onChange(value: string, _old: string) {
-    console.log('change mode')
     const form = forms.navigation;
     form!.elements.main.value = value;
     form!.elements[value].innerHTML = modules.get(value)[0];

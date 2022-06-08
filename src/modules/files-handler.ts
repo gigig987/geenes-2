@@ -69,12 +69,11 @@ export default () => {
     }
     onRemove(key: number) {
       const forms = document.forms as Forms;
-      console.log('removing', forms[`file_${key}`]);
       forms[`file_${key}`].parentElement.remove();
     }
   }, 1);
 
-  tree.insert(1, 11, {type: 'FOLDER', name: 'Empty folder'});
+  tree.insert(1, self.crypto.randomUUID(), {type: 'FOLDER', name: 'Empty folder'});
   tree.insert(1, 12, {type: 'FOLDER', name: 'New folder'});
   tree.insert(1, 13, {type: 'FILE_COLOR', name: 'colors'});
   tree.insert(12, 121, {type: 'FILE_COLOR', name: 'ant.colors'});
@@ -104,7 +103,6 @@ export default () => {
     // ol(container) > li(draggable) > form(item, key)
     //if the owner reference is still null, set it to this item's parent
     //so that further selection is only allowed within the same container
-    console.log(item.parentElement,getContainerForm(item.parentNode!) )
     if (!selections.owner) {
       selections.owner = getContainerForm(item.parentNode!);
     }
@@ -117,7 +115,6 @@ export default () => {
 
     //set this item's grabbed state
     item.parentElement!.setAttribute('aria-grabbed', 'true');
-    console.log(item);
     //add it to the items array
     selections.items.push(item);
   }
@@ -253,22 +250,24 @@ export default () => {
         (
         !hasModifier(e)
         &&
-        form!.parentElement!.getAttribute('aria-grabbed') == 'false'
+        form!.parentElement!.getAttribute('aria-grabbed') === 'false'
       ) {
         //clear all existing selections
         clearSelections();
         //then add this new selection
         addSelection(form!);
-        console.log(selections);
       }
     }
 
     //else [if the element is anything else]
     //and the selection modifier is not pressed 
-    else if (!hasModifier(e)) {
+    else if (
+      !hasModifier(e)
+      &&
+      ((e.target as HTMLButtonElement).name !== 'new-file' &&  (e.target as HTMLButtonElement).name !== 'new-folder')
+      ) {
       //clear dropeffect from the target containers
       clearDropeffects();
-
       //clear all existing selections
       clearSelections();
     }
@@ -277,6 +276,7 @@ export default () => {
     else {
       //clear dropeffect from the target containers
       clearDropeffects();
+
     }
 
   }
@@ -315,7 +315,6 @@ export default () => {
   _.addEventListener('dragstart', function (e) {
     if (e.target !instanceof HTMLElement) {
       const form = e.target.querySelector('form');
-      console.log('dragstart', e.target, selections.owner, getContainerForm(e.target))
       //if the element's parent is not the owner, then block this event
       if (selections.owner !== getContainerForm(e.target)) {
         e.preventDefault();
@@ -530,13 +529,12 @@ export default () => {
     //if we have a valid drop target reference
     //(which implies that we have some selected items)
 
-    console.log(e.target)
     if (selections.droptarget instanceof HTMLFormElement) {
 
       //append the selected items to the end of the target container
       for (var len = selections.items.length, i = 0; i < len; i++) {
-        const key = parseInt((selections.items[i]!.attributes as DraggableNodeAttributes).name.value.split('_')[1]);
-        const parentKey = parseInt((selections.droptarget!.attributes as DraggableNodeAttributes).name.value.split('_')[1]);
+        const key = (selections.items[i]!.attributes as DraggableNodeAttributes).name.value.split('_')[1];
+        const parentKey = (selections.droptarget!.attributes as DraggableNodeAttributes).name.value.split('_')[1];
         tree.move(parentKey, key);
       }
 
@@ -592,4 +590,22 @@ export default () => {
     }
 
   }, false);
+
+  // handle buttons for new files and folders
+  const forms = document.forms as Forms;
+  forms['files-actions'].addEventListener('submit', ({submitter: {name}}: {submitter: HTMLFormElement}) => {
+    let parentKey: number | string = 1; // root
+
+    if(selections.items.length) {
+      const item = selections.items.reverse().find(item => item.getAttribute('data-drop'));
+      item!.querySelector('details')!.setAttribute('open', '');
+      parentKey = item ? (item.attributes as DraggableNodeAttributes).name.value.split('_')[1] : parentKey;
+    }
+    if (name === 'new-file') {
+      tree.insert(parentKey, self.crypto.randomUUID(), {type: 'FILE_COLOR', name: ''});
+    } else if (name === 'new-folder') {
+      tree.insert(parentKey, self.crypto.randomUUID(), {type: 'FOLDER', name: 'New folder'});
+    }
+  });
+
 }

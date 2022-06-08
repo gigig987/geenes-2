@@ -154,6 +154,7 @@ form[name="navigation"] output {
   text-align: left;
   font-size: initial;
   width: calc(100% - var(--size-nav, 48px));
+  height: 95%;
 }
 
 form[name="navigation"] input[type="radio"] {

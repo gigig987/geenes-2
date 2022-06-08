@@ -18,32 +18,32 @@
       </form>
     </li>
   </template>
-  <details>
-    <summary>
-      <span>
-        Files
-      </span>
-      <aside>
-        <form name="files-actions">
-          <menu>
-            <li><button aria-label="new file">📄</button></li>
-            <li><button aria-label="new folder">📁</button></li>
-          </menu>
+    <details>
+      <summary>
+          Files
+        <aside>
+          <!-- THIS empty form will not be rendered but it's used to display the others -->
+          <form></form>
+          <form name="files-actions">
+            <menu>
+              <li><button name="new-file" aria-label="new file">📄</button></li>
+              <li><button name="new-folder" aria-label="new folder">📁</button></li>
+            </menu>
+          </form>
+          </aside>
+        </summary>
+        <form aria-dropeffect="none" data-drop="true" data-root="true">
+          <ol>
+          </ol>
         </form>
-      </aside>
-    </summary>
-    <form aria-dropeffect="none" data-drop="true" data-root="true">
-      <ol>
-      </ol>
-    </form>
     </details>
 </article>
 
 <style>
-  .folder summary {
+  .folder > summary {
     list-style-type: "\1F4C1";
   }
-  .folder[open] summary {
+  .folder[open] > summary {
     list-style-type: "\1F4C2";
   }
 
@@ -55,7 +55,9 @@
     outline: 1px dotted #212121;
     outline: 5px auto -webkit-focus-ring-color;
   }
-
+  #file-handler {
+    height: 100%;
+  }
   #file-handler ol {
     list-style-type: none;
     padding: 0;
