@@ -1,0 +1,17 @@
+:root {
+ /* main */
+--size-0-0: 1px;
+--size-0-1: 8px;
+--size-0-2: 24px;
+--size-0-3: 48px;
+--size-0-4: 20px;
+
+
+}
+
+:root {
+  --size-stroke: var(--size-0-0);
+  --size-touchable: var(--size-0-2);
+  --size-nav: var(--size-0-3);
+  --size-icons: var(--size-0-4);
+}

@@ -1,0 +1,15 @@
+.color-emoji { 
+  text-shadow: 0px 0px 0px var(--icon-color, currentColor);
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* LAYOUTS  */
+.flow-h > * + * {
+  margin-left: var(--spacing, 1em);
+}
+.flow-v > * + * {
+  margin-top: var(--spacing, 1em);
+}

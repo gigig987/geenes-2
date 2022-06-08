@@ -1,0 +1,41 @@
+input[name="logged-in"]:not(:checked) ~ output[name="logged-in-status"] {
+  display: none;
+}
+input[name="logged-in"]:checked ~ output[name="anon-status"] {
+  display: none;
+}
+
+form[name="project"] input[name="is-private"]:checked ~ output[name="private-icon"] {
+  visibility: hidden;
+}
+form[name="project"] input[name="is-private"]:not(:checked) ~ output[name="public-icon"] {
+  visibility: hidden;
+}
+
+form[name="overlay"] input[name="show"]:not(:checked) ~ output[name="modal"] {
+  visibility: hidden;
+}
+
+input#menu-toggle{
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+}
+
+input#menu-toggle:not(:checked) ~ output[name="menu"] {
+  visibility: hidden;
+}
+
+
+form[name="navigation"] output {
+  display: none;
+}
+form[name="navigation"] input[name="main"][value="files"]:checked ~ output {
+  display: initial;
+}
+form[name="navigation"] input[name="main"][value="team"]:checked ~ output {
+  display: initial;
+}
+form[name="navigation"] input[name="main"][value="comments"]:checked ~ output {
+  display: initial;
+}

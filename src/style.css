@@ -1,0 +1,211 @@
+@import './tokens/index.css';
+
+html {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  font-size: 14px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body #editor{
+  display: grid;
+  grid-template-rows: 3rem 1fr 1.5rem;
+  height: 100vh;
+  width: 100vw;
+}
+
+form[name="overlay"] output[name="modal"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--space-outer, 1em);
+  border-bottom: var(--size-stroke) solid var(--color-stroke);
+  --spacing: var(--space-outer);
+}
+
+form[name="main-menu"] label {
+  font-size: var(--size-icons, 1rem);
+}
+input#menu-toggle:focus ~ label{
+  outline: 1px dotted #212121;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+#app-logo {
+  display: flex;
+  align-items: baseline;
+  flex: 1;
+}
+
+#app-logo svg {
+  width: 16px;
+}
+
+#app-logo figcaption {
+  --spacing: var(--space-inner);
+  white-space: nowrap;
+}
+
+form[name="project"] fieldset {
+  border: none;
+  padding: 0;
+  display: inline-block;
+  position: relative;
+}
+form[name="project"] label {
+  position: absolute;
+  opacity: 0;
+  left: 0;
+  top:0;
+  transition: top 0.5s, opacity 0.2s;
+}
+
+form[name="project"] input[type="text"]:focus ~ label {
+  z-index: 1;
+  opacity: 1;
+  top: 100%;
+}
+
+header .left-side, header .right-side, header .centered-block {
+  display: flex;
+  align-items: baseline;
+}
+header .left-side {
+  justify-content: flex-start;
+}
+header .centered-block {
+  justify-content: center;
+}
+header .right-side {
+  justify-content: flex-end;
+}
+
+form[name="account-actions"] { 
+  display: flex;
+  align-items: baseline;
+}
+
+.button {
+  color: var(--color-on-secondary);
+  background-color: var(--color-secondary);
+  border: none;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+}
+.button.button-primary {
+  color: var(--color-on-primary);
+  background-color: var(--color-primary);
+}
+input[type="text"][readonly], input[type="search"][readonly], input[type="password"][readonly] { 
+  background: transparent;
+  border: none;
+}
+input:not([type="checkbox"]), button, .button {
+  display: inline-flex;
+  justify-content: center;
+  font-size: 1rem;
+  padding: var(--space-on-input-v, 0.25rem) var(--space-on-input-h, 0.5rem);
+  min-width: var(--size-touchable, 48px);
+}
+
+input[type="text"], input[type="search"], input[type="password"] {
+  border-radius: var(--shape-full, 1rem);
+  border: var(--size-stroke) solid var(--color-stroke);
+  color: var(--color-on-surface-deep);
+  background-color: var(--color-surface-deep);
+}
+
+main {
+  display: inline-flex;
+}
+
+/* Navigation bar */
+main form[name="navigation"] {
+  display: inline-flex;
+  position: relative;
+  overflow-x: hidden;
+
+  text-align: center;
+  --spacing: var(--space-outer);
+}
+
+form[name="navigation"] output {
+  position: absolute;
+  top: 0;
+  left: var(--size-nav, 48px);
+  text-align: left;
+  font-size: initial;
+  width: calc(100% - var(--size-nav, 48px));
+}
+
+form[name="navigation"] input[type="radio"] {
+  position: absolute;
+  opacity: 0.01;
+  z-index: -1;
+}
+
+form[name="navigation"] fieldset {
+  border: none;
+  padding: 0;
+  margin-left: 0;
+  margin-right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--size-icons);
+}
+form[name="navigation"] label {
+  flex: 1;
+  background-color: var(--color-surface);
+  --icon-color: var(--color-on-surface-tuned-down);
+}
+form[name="navigation"] input:checked + label {
+  --icon-color: var(--color-on-surface);
+}
+form[name="navigation"] input:focus + label {
+  outline: 1px dotted #212121;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+main nav {
+  width: var(--size-nav, 48px);
+  border-right: var(--size-stroke) solid var(--color-stroke);
+  padding: var(--space-inner);
+  box-sizing: border-box;
+}
+
+
+main form[name="navigation"] > aside {
+  resize: horizontal;
+  overflow: auto;
+  width: 320px;
+  border-right: var(--size-stroke) solid var(--color-stroke);
+
+}
+
+main > article {
+  flex: 1;
+  background-color: var(--color-surface-deep);
+}
+
+footer {
+  color: var(--color-on-surface-raised);
+  background-color: var(--color-surface-raised);
+}

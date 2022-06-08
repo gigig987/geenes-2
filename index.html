@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geenes</title>
+  </head>
+  <body>
+    <form name="overlay">
+      <input name="show" type="checkbox" hidden>
+      <output name="modal">
+        <aside>
+          <div><button name="close">✕</button></div>
+          <article>
+            ...content will go here
+          </article>
+        </aside>
+      </output>
+    </form>
+    <div id="editor">
+      <header>
+        <div class="left-side flow-h">
+          <form name="main-menu">
+            <input id="menu-toggle" type="checkbox"><label for="menu-toggle" aria-label="menu">☰</label>
+            <!-- <output name="menu">
+              <menu>
+                <li>bla</li>
+                <li>foo</li>
+              </menu>
+            </output> -->
+          </form>
+          <figure id="app-logo" class="flow-h">
+            <svg id="Layer_1" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+              x="0px" y="0px" viewBox="0 0 64 96" style="enable-background:new 0 0 64 96;" fill="currentColor"
+              xml:space="preserve">
+              <circle cx="8.8" cy="18.4" r="7.6" />
+              <circle cx="24" cy="7.6" r="7.6" />
+              <circle cx="50.5" cy="23" r="9.2" />
+              <circle cx="52.4" cy="76.5" r="9.2" />
+              <circle cx="43.2" cy="6.7" r="6" />
+              <circle cx="42" cy="37.2" r="6" />
+              <circle cx="28.3" cy="39.4" r="6" />
+              <circle cx="21.4" cy="59.7" r="6" />
+              <circle cx="38.8" cy="87.9" r="6" />
+              <circle cx="37.2" cy="64.1" r="6" />
+              <circle cx="58.8" cy="5.2" r="5.2" />
+              <circle cx="13.8" cy="35.2" r="7.6" />
+              <circle cx="7.6" cy="50.5" r="7.6" />
+              <circle cx="8.8" cy="74.9" r="7.6" />
+              <circle cx="22.3" cy="87.9" r="7.6" />
+            </svg>
+            <figcaption>pre-alpha - 0.0.1</figcaption>
+          </figure>
+        </div>
+        <div class="centered-block">
+          <form name="project">
+            <input type="checkbox" name="is-private" hidden>
+            Anonymous /
+            <fieldset>
+              <input name="name" id="header-project-name" type="text" value="project name" readonly>
+              <label for="header-project-name">project name</label>
+            </fieldset>
+            <output name="private-icon" aria-label="private project">🔐</output>
+            <output name="public-icon" aria-label="public project">🌍</output>
+          </form>
+        </div>
+        <div class="right-side">
+          <form name="action-bar">
+            <input name="search" type="text" placeholder="type / to start searching">
+          </form>
+          <form name="account-actions" class="flow-h">
+            <input name="logged-in" type="checkbox" hidden>
+            <a class="button" href="#/settings" aria-label="settings">⚙</a>
+            <button name="new-project" class="button">New project</button>
+            <output name="anon-status">
+              <a class="button button-primary" href="#/sign-in">Sign in</a>
+            </output>
+            <output name="logged-in-status">
+              <div id="signed-in-header" loading="lazy">
+                <figure class="avatar"><span></span></figure>
+                <div class="popover">
+                  <menu>
+                    <li><a href="#/profile">Profile</a></li>
+                    <li><a href="#/bye">Sign out</a></li>
+                  </menu>
+                </div>
+              </div>
+            </output>
+          </form>
+        </div>
+      </header>
+      <main>
+        <form name="navigation">
+          <nav class="flow-v">
+              <fieldset>
+                <input type="radio" name="main" value="files" id="nav-main-files" checked>
+                <label class="color-emoji" for="nav-main-files" aria-label="files">📄</label>
+                <output name="files"><h2>Files</h2></output>
+              </fieldset>
+              <fieldset>
+                <input type="radio" name="main" value="team" id="nav-main-team">
+                <label class="color-emoji" for="nav-main-team" aria-label="team">👥</label>
+                <output name="team"><h2>Team</h2></output>
+            </fieldset>
+              <fieldset>
+                <input type="radio" name="main" value="comments" id="nav-main-comments">
+                <label class="color-emoji" for="nav-main-comments" aria-label="comments">💬</label>
+                <output name="comments"><h2>Comments</h2></output>
+            </fieldset>
+            </nav>
+          <aside resizable>
+          </aside>
+        </form>
+
+        <article>
+  
+        </article>
+      </main>
+      <footer></footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+    
+  </body>
+</html>

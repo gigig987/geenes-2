@@ -1,0 +1,69 @@
+<article id="file-handler">
+  <template id="folder-template">
+    <li draggable="true" aria-grabbed="false" >
+      <form aria-dropeffect="none" data-drop="true">
+      <details class="folder">
+          <summary>
+            <input name="name" type="text" readonly value="" tabIndex="-1"/>
+          </summary>
+          <ol></ol>
+        </details>
+      </form>
+    </li>
+  </template>
+  <template id="file-template">
+    <li draggable="true" aria-grabbed="false" tabIndex="0">
+      <form>
+        <input name="name" type="text" readonly value="" tabIndex="-1"/>
+      </form>
+    </li>
+  </template>
+  <details>
+    <summary>
+      <span>
+        Files
+      </span>
+      <aside>
+        <form name="files-actions">
+          <menu>
+            <li><button aria-label="new file">📄</button></li>
+            <li><button aria-label="new folder">📁</button></li>
+          </menu>
+        </form>
+      </aside>
+    </summary>
+    <form aria-dropeffect="none" data-drop="true" data-root="true">
+      <ol>
+      </ol>
+    </form>
+    </details>
+</article>
+
+<style>
+  .folder summary {
+    list-style-type: "\1F4C1";
+  }
+  .folder[open] summary {
+    list-style-type: "\1F4C2";
+  }
+
+  .dragover {
+    background-color: var(--color-surface-deep);
+  }
+
+  *[aria-grabbed="true"] > form:not([data-drop="true"]), *[aria-grabbed="true"] > form > details > summary {
+    outline: 1px dotted #212121;
+    outline: 5px auto -webkit-focus-ring-color;
+  }
+
+  #file-handler ol {
+    list-style-type: none;
+    padding: 0;
+    padding-left: var(--space-indent);
+    margin-bottom: var(--space-indent);
+  }
+  #file-handler *[data-root="true"] > ol {
+    padding-left: 0;
+  }
+
+</style>
