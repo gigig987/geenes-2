@@ -102,7 +102,7 @@ form[name="account-actions"] {
   align-items: baseline;
 }
 
-.button {
+button, input[type=submit], input[type=reset], .button {
   color: var(--color-on-secondary);
   background-color: var(--color-secondary);
   border: none;
@@ -110,10 +110,16 @@ form[name="account-actions"] {
   text-decoration: none;
   cursor: pointer;
 }
-.button.button-primary {
+button.button-primary input[type=submit].button-primary, input[type=reset].button-primary, .button.button-primary {
   color: var(--color-on-primary);
   background-color: var(--color-primary);
 }
+
+button.button-link, input[type=submit].button-link, input[type=reset].button-link, .button.button-link {
+  color: var(--color-on-surface);
+  background-color: transparent;
+}
+
 input[type="text"][readonly], input[type="search"][readonly], input[type="password"][readonly] { 
   background: transparent;
   border: none;
@@ -166,8 +172,8 @@ form[name="navigation"] input[type="radio"] {
 form[name="navigation"] fieldset {
   border: none;
   padding: 0;
-  margin-left: 0;
-  margin-right: 0;
+  /* margin-left: 0;
+  margin-right: 0; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -209,4 +215,8 @@ main > article {
 footer {
   color: var(--color-on-surface-raised);
   background-color: var(--color-surface-raised);
+}
+
+details > summary aside {
+  display: inline-flex;
 }

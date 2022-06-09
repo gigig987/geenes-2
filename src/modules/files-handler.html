@@ -1,10 +1,27 @@
 <article id="file-handler">
   <template id="folder-template">
     <li draggable="true" aria-grabbed="false" >
-      <form aria-dropeffect="none" data-drop="true">
+      <form aria-dropeffect="none" data-drop="true" class="flow-h">
       <details class="folder">
           <summary>
-            <input name="name" type="text" readonly value="" tabIndex="-1"/>
+            <div>
+              <label>
+                <input name="name" type="text" readonly disabled value="" tabIndex="-1"/>
+              </label>
+              <fieldset>
+                <menu class="flow-h">
+                  <li>
+                    <button class="button-link" name="rename" aria-label="rename">✎</button>
+                  </li>
+                  <li>
+                    <button class="button-link" name="move" aria-label="move">⇅</button>
+                  </li>
+                  <li>
+                    <button class="button-link" name="delete" aria-label="delete">✕</button>
+                  </li>
+                </menu>
+              </fieldset>
+            </div>
           </summary>
           <ol></ol>
         </details>
@@ -13,8 +30,24 @@
   </template>
   <template id="file-template">
     <li draggable="true" aria-grabbed="false" tabIndex="0">
-      <form>
-        <input name="name" type="text" readonly value="" tabIndex="-1"/>
+      <form class="flow-h">
+        <label name="file-type" class="flow-h">
+          <span></span>
+          <input name="name" type="text" readonly  disabled value="" tabIndex="-1"/>
+        </label>
+        <fieldset>
+          <menu class="flow-h">
+            <li>
+              <button class="button-link" name="rename" aria-label="rename">✎</button>
+            </li>
+            <li>
+              <button class="button-link" name="move" aria-label="move">⇅</button>
+            </li>
+            <li>
+              <button class="button-link" name="delete" aria-label="delete">✕</button>
+            </li>
+          </menu>
+        </fieldset>
       </form>
     </li>
   </template>
@@ -25,9 +58,9 @@
           <!-- THIS empty form will not be rendered but it's used to display the others -->
           <form></form>
           <form name="files-actions">
-            <menu>
-              <li><button name="new-file" aria-label="new file">📄</button></li>
-              <li><button name="new-folder" aria-label="new folder">📁</button></li>
+            <menu class="flow-h">
+              <li><button class=" color-emoji" name="new-file" aria-label="new file">📄</button></li>
+              <li><button class=" color-emoji" name="new-folder" aria-label="new folder">📁</button></li>
             </menu>
           </form>
           </aside>
@@ -46,7 +79,9 @@
   .folder[open] > summary {
     list-style-type: "\1F4C2";
   }
-
+  .folder > summary fieldset {
+    display: inline-flex;
+  }
   .dragover {
     background-color: var(--color-surface-deep);
   }
@@ -61,11 +96,54 @@
   #file-handler ol {
     list-style-type: none;
     padding: 0;
+    flex: 1;
     padding-left: var(--space-indent);
     margin-bottom: var(--space-indent);
+  }
+  #file-handler li {
+    list-style-type: none;
+    padding: 0;
   }
   #file-handler *[data-root="true"] > ol {
     padding-left: 0;
   }
+  #file-handler form {
+    display: flex;
+  }
+  #file-handler form > * {
+    flex: 1;
+  }
+  #file-handler [aria-grabbed="false"] > form menu {
+    /* display: none; */
+  }
+  #file-handler menu {
+   
+   display: inline-flex;
+   --spacing: var(--space-inner);
+   margin:0;
+   padding:0;
+  }
+  #file-handler menu button {
+    font-weight: bolder;
+  }
+  #file-handler form label {
+    display: inline-flex;
+  }
+  #file-handler form summary > * {
+    display: inline-flex;
+    width: calc(100% - 22px);
+  }
+  #file-handler form summary label {
+    pointer-events: none;
 
+  }
+  #file-handler form label + fieldset, #file-handler form input + fieldset {
+    flex-grow: 0;
+  }
+  #file-handler form input {
+    width: 100%;
+  }
+  #file-handler label[name="file-type"] {
+    --spacing: var(--space-on-input-h);
+  }
 </style>

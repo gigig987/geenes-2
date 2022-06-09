@@ -41,34 +41,67 @@ export default () => {
   // Tree data structure
   const tree = new Tree(new class {
     onInit(key: number): void{
+      // assign to the root element the root key
       const form = _.querySelector('ol')!.parentNode;
       if (form instanceof HTMLFormElement) {
         form.name = `file_${key}`;
       }
     }
+
     onAdd(parentKey: number, key: number, { type, name } : Data) {
+    // depending on the type load the right template
+    // FOLDER | FILE_...
     const template = ((
       document
       .querySelector(`#${type.toLowerCase().split('_')[0]}-template`) as HTMLTemplateElement)!
       .content.cloneNode(true) as DocumentFragment)
       .firstElementChild;
-
+    
+    // get the firt, main form of the template
     const form = template!.querySelector('form');
-
+    
+    //assign to the fomr the key of the tree node
     if (form instanceof HTMLFormElement) {
       form.name = `file_${key}`;
+      form.addEventListener('submit', ({submitter: {name}}: {submitter: HTMLFormElement}) => { 
+        if (name === 'delete') {
+          tree.remove(key);
+          console.log(tree)
+        } else if (name === 'rename') {
+          // TODO implement rename functionality with autofocus
+        } else if (name === 'move') {
+          // TODO implement move status for keyboard move
+        }
+       });
     }
+    // reference to the document forms
     const forms = document.forms as Forms;
-    (form!.elements as DraggableFormsElements).name.value =`${fileType[type]} ${name}`;
+
+    // render the tree node name in an input
+    const input = (form!.elements as DraggableFormsElements).name;
+    input.value = `${name}`;
+    // input.onclick = (e) => { console.log(e); e.preventDefault();};
+    // if there is an element before the input fill it the icon type
+    if (input.previousElementSibling)
+      input.previousElementSibling.textContent = `${fileType[type]}`;
+
+    // finally render the new element in the <ol>
     forms[`file_${parentKey}`].querySelector('ol').appendChild(template);
     }
 
     onMove(parentKey: number, key: number) {
+      // reference to the document forms
       const forms = document.forms as Forms;
+      // append to the new form the selected element
+      // parentElement is the container of the form and the first element in the template hierarchy
       forms[`file_${parentKey}`].querySelector('ol').appendChild(forms[`file_${key}`].parentElement);
     }
     onRemove(key: number) {
+      // reference to the document forms
+      console.log(key)
       const forms = document.forms as Forms;
+      // remove the selected element from its container form
+      // parentElement is the container of the form and the first element in the template hierarchy
       forms[`file_${key}`].parentElement.remove();
     }
   }, 1);
@@ -235,6 +268,7 @@ export default () => {
   //mousedown event to implement single selection
   _.addEventListener('mousedown', function (e) {
     // get the form containing the clicked target
+    console.log(e.target)
     if (e.target !instanceof HTMLElement) {
      const form = getContainerForm(e.target);
 
@@ -602,7 +636,7 @@ export default () => {
       parentKey = item ? (item.attributes as DraggableNodeAttributes).name.value.split('_')[1] : parentKey;
     }
     if (name === 'new-file') {
-      tree.insert(parentKey, self.crypto.randomUUID(), {type: 'FILE_COLOR', name: ''});
+      tree.insert(parentKey, self.crypto.randomUUID(), {type: 'FILE_GENERIC', name: ''});
     } else if (name === 'new-folder') {
       tree.insert(parentKey, self.crypto.randomUUID(), {type: 'FOLDER', name: 'New folder'});
     }

@@ -82,7 +82,7 @@ export default class Tree {
       const filtered = node.children.filter((c: Node) => c.key !== key);
       if (filtered.length !== node.children.length) {
         node.children = filtered;
-        this.#client!.onRemove(node.key);
+        this.#client!.onRemove(key);
         return true;
       }
     }
