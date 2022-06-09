@@ -6,13 +6,13 @@ export interface Data {
   name: string;
   type: DataType
 }
-type key = string | number;
+export type key = string | number;
 
 export interface TreeModelObserver {
   onAdd(parentNodeKey:  key, key: key, value: Data): void;
   onInit(key: key): void;
   onMove(parentNodeKey: key, key: key): void;
-  // onUpdate(key: number, value: Data): void;
+  onUpdate(key: key, value: Data): void;
   onRemove(key: key): void;
 }
 class TreeNode {
@@ -104,6 +104,15 @@ export default class Tree {
     node.parent = parent;
     parent.children.push(node);
     this.#client?.onMove(parent.key, node.key);
+    return true;
+  }
+
+  update(key:key, update : Partial<Data>) {
+    const node = this.find(key);
+    if (!node) { return false; }
+
+    node.value = {...node.value , ...update};
+    this.#client?.onUpdate(key, node.value);
     return true;
   }
 }

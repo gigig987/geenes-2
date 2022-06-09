@@ -1,5 +1,5 @@
 import Tree from './tree';
-import { Data } from './tree';
+import { Data, key } from './tree';
 import * as fileType from '../config/fileType.json';
 
 declare global {
@@ -48,7 +48,7 @@ export default () => {
       }
     }
 
-    onAdd(parentKey: number, key: number, { type, name } : Data) {
+    onAdd(parentKey: key, key: key, { type, name } : Data) {
     // depending on the type load the right template
     // FOLDER | FILE_...
     const template = ((
@@ -63,46 +63,75 @@ export default () => {
     //assign to the fomr the key of the tree node
     if (form instanceof HTMLFormElement) {
       form.name = `file_${key}`;
-      form.addEventListener('submit', ({submitter: {name}}: {submitter: HTMLFormElement}) => { 
+      const input = (form!.elements as DraggableFormsElements).name;
+      input.onchange = form!.onsubmit = () => tree.update(key,  Object.fromEntries(new FormData(form)));
+      input.addEventListener('blur', ({ target }) => {
+        if (target && target instanceof Element) {
+          target.setAttribute('readonly', '');
+          target.setAttribute('disabled', '');
+        }
+      });
+      input.addEventListener('keypress', (e: KeyboardEvent) => {
+        const { target, key } = e;
+        if (target && target instanceof HTMLInputElement) {
+          if (key === 'Enter') { e.preventDefault(); target.blur(); }
+        }
+      });
+      form.addEventListener('submit', ({submitter: {name}}: {submitter: any}) => {
+        console.log(name);
         if (name === 'delete') {
           tree.remove(key);
-          console.log(tree)
         } else if (name === 'rename') {
-          // TODO implement rename functionality with autofocus
+          // rename functionality with autofocus
+          input.removeAttribute('readonly');
+          input.removeAttribute('disabled');
+          input.focus();
+          input.select();
         } else if (name === 'move') {
           // TODO implement move status for keyboard move
         }
        });
+       // reference to the document forms
+       const forms = document.forms as Forms;
+       
+       // render the tree node name in an input
+       input.value = `${name}`;
+       // input.onclick = (e) => { console.log(e); e.preventDefault();};
+       // if there is an element before the input fill it the icon type
+       if (input.previousElementSibling)
+       input.previousElementSibling.textContent = `${fileType[type]}`;
+       
+       // finally render the new element in the <ol>
+       forms[`file_${parentKey}`].querySelector('ol').appendChild(template);
+      }
     }
-    // reference to the document forms
-    const forms = document.forms as Forms;
 
-    // render the tree node name in an input
-    const input = (form!.elements as DraggableFormsElements).name;
-    input.value = `${name}`;
-    // input.onclick = (e) => { console.log(e); e.preventDefault();};
-    // if there is an element before the input fill it the icon type
-    if (input.previousElementSibling)
-      input.previousElementSibling.textContent = `${fileType[type]}`;
-
-    // finally render the new element in the <ol>
-    forms[`file_${parentKey}`].querySelector('ol').appendChild(template);
-    }
-
-    onMove(parentKey: number, key: number) {
+    onMove(parentKey: key, key: key) {
       // reference to the document forms
       const forms = document.forms as Forms;
       // append to the new form the selected element
       // parentElement is the container of the form and the first element in the template hierarchy
       forms[`file_${parentKey}`].querySelector('ol').appendChild(forms[`file_${key}`].parentElement);
     }
-    onRemove(key: number) {
+    onRemove(key: key) {
       // reference to the document forms
-      console.log(key)
       const forms = document.forms as Forms;
       // remove the selected element from its container form
       // parentElement is the container of the form and the first element in the template hierarchy
       forms[`file_${key}`].parentElement.remove();
+    }
+    onUpdate(key: key, { type, name } : Data): void {
+      console.log('update', name)
+      // reference to the document forms
+      const forms = document.forms as Forms;
+      // update the selected element
+      const input = (forms[`file_${key}`]!.elements as DraggableFormsElements).name;
+
+      input.value = `${name}`;
+      // input.onclick = (e) => { console.log(e); e.preventDefault();};
+      // if there is an element before the input fill it the icon type
+      if (input.previousElementSibling)
+      input.previousElementSibling.textContent = `${fileType[type]}`;
     }
   }, 1);
 
@@ -244,16 +273,16 @@ export default () => {
   }
 
   //shortcut function for identifying an event element's target container
-  const getContainer = (element: ParentNode | null): HTMLElement | null => {
-    do {
-      if (element!.nodeType == 1 && (element as Element).getAttribute('aria-dropeffect')) {
-        return element as HTMLElement;
-      }
-    }
-    while (element = element!.parentNode);
+  // const getContainer = (element: ParentNode | null): HTMLElement | null => {
+  //   do {
+  //     if (element!.nodeType == 1 && (element as Element).getAttribute('aria-dropeffect')) {
+  //       return element as HTMLElement;
+  //     }
+  //   }
+  //   while (element = element!.parentNode);
 
-    return null;
-  }
+  //   return null;
+  // }
   //shortcut function for identifying an event element's target container
   const getContainerForm = (element: ParentNode | null): HTMLFormElement | null => {
     do {

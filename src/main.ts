@@ -11,36 +11,13 @@ import filesHandlerCode from './modules/files-handler';
 // import ProjectModel from './models/project';
 import ModeModel from './models/mode';
 
-interface appReactiveParts extends HTMLCollection {
-  overlay?: OverlayForm
-  project?: ProjectForm
-  navigation?: NavigationForm
-}
-interface OverlayFormElements extends HTMLFormControlsCollection {
-  close: HTMLFormElement;
-  show: HTMLFormElement;
-}
-interface ProjectFormElements extends HTMLFormControlsCollection {
-  name: HTMLFormElement;
-}
-interface NavigationFormElements extends HTMLFormControlsCollection {
-  main: HTMLFormElement;
-}
-interface OverlayForm extends HTMLFormElement {
-  elements: OverlayFormElements
-}
-interface ProjectForm extends HTMLFormElement {
-  elements: ProjectFormElements
-}
-interface NavigationForm extends HTMLFormElement {
-  elements: NavigationFormElements
-}
+interface Forms { [key: string]: any }
 
 const modules = new Map();
 modules.set('sign-in', [signInTemplate, signInCode]);
 modules.set('files', [filesHandlerTemplate, filesHandlerCode]);
 
-const forms = document.forms as appReactiveParts;
+const forms = document.forms as Forms;
 
 const setOverlay = async () => {
   const name = location.hash.slice(2);
@@ -56,7 +33,7 @@ const setOverlay = async () => {
 
 const clearOverlay = () => {
   history.pushState("", document.title, window.location.pathname + window.location.search);
-  const forms = document.forms as appReactiveParts;
+  const forms = document.forms as Forms;
   forms.overlay!.elements.show.checked = false;
   const slot = forms.overlay?.getElementsByTagName('article')[0]
   slot!.innerHTML = '';
@@ -129,7 +106,7 @@ const modeCtrl = new ModeModel(new class {
   onChange(value: string, _old: string) {
     const form = forms.navigation;
     form!.elements.main.value = value;
-    form!.elements[value].innerHTML = modules.get(value)[0];
+    form!.elements[value as string].innerHTML = modules.get(value)[0];
     modules.get(value)[1]();
     form!.elements.main.forEach((radio: HTMLFormElement) => {
       radio.onchange = form!.onsubmit = () => modeCtrl.changeMode(Object.fromEntries(new FormData(form) as any)['main']);
