@@ -181,7 +181,6 @@ form[name="navigation"] fieldset {
 }
 form[name="navigation"] label {
   flex: 1;
-  background-color: var(--color-surface);
   --icon-color: var(--color-on-surface-tuned-down);
 }
 form[name="navigation"] input:checked + label {

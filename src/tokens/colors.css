@@ -2,10 +2,11 @@
  /* neutral */
   --color-0-0: #000000;
   --color-0-1: #151515;
-  --color-0-2: #444444;
+  --color-0-2: #666666;
   --color-0-3: #E5E5E5;
   --color-0-4: #FFFFFF;
   --color-0-5: #3F3F3F;
+  --color-0-6: #262626;
  /* primary */
   --color-1-0: #5f42f0;
 
@@ -42,6 +43,6 @@
     --color-on-surface-raised: var(--color-0-3);
     --color-secondary: var(--color-0-2);
     --color-on-secondary: var(--color-0-3);
-    --color-stroke: var(--color-0-2);
+    --color-stroke: var(--color-0-6);
   }
 }

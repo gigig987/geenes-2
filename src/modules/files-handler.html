@@ -51,7 +51,7 @@
       </form>
     </li>
   </template>
-    <details>
+    <details open>
       <summary>
           Files
         <aside>
@@ -113,11 +113,15 @@
   #file-handler form > * {
     flex: 1;
   }
-  #file-handler [aria-grabbed="false"] > form menu {
-    /* display: none; */
+  #file-handler [draggable="true"] > form menu {
+    display: none;
+  }
+  #file-handler [aria-grabbed="true"] > form > details > summary > div > fieldset > menu,
+  #file-handler [aria-grabbed="true"] > form > fieldset > menu
+  {
+    display: inline-flex;
   }
   #file-handler menu {
-   
    display: inline-flex;
    --spacing: var(--space-inner);
    margin:0;
@@ -135,7 +139,6 @@
   }
   #file-handler form summary label {
     pointer-events: none;
-
   }
   #file-handler form label + fieldset, #file-handler form input + fieldset {
     flex-grow: 0;
