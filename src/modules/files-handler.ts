@@ -133,15 +133,15 @@ export default () => {
       if (input.previousElementSibling)
       input.previousElementSibling.textContent = `${fileType[type]}`;
     }
-  }, 1);
+  });
 
-  tree.insert(1, self.crypto.randomUUID(), {type: 'FOLDER', name: 'Empty folder'});
-  tree.insert(1, 12, {type: 'FOLDER', name: 'New folder'});
-  tree.insert(1, 13, {type: 'FILE_COLOR', name: 'colors'});
-  tree.insert(12, 121, {type: 'FILE_COLOR', name: 'ant.colors'});
-  tree.insert(1, 14, {type: 'FILE_MEASURE', name: 'spacing'});
-  tree.insert(12, 122, {type: 'FILE_FLOW', name: 'flusso'});
-  tree.insert(12, 123, {type: 'FOLDER', name: 'deep folder'});
+  // tree.insert(1, 11, {type: 'FOLDER', name: 'Empty folder'});
+  // tree.insert(1, 12, {type: 'FOLDER', name: 'New folder'});
+  // tree.insert(1, 13, {type: 'FILE_COLOR', name: 'colors'});
+  // tree.insert(12, 121, {type: 'FILE_COLOR', name: 'ant.colors'});
+  // tree.insert(1, 14, {type: 'FILE_MEASURE', name: 'spacing'});
+  // tree.insert(12, 122, {type: 'FILE_FLOW', name: 'flusso'});
+  // tree.insert(12, 123, {type: 'FOLDER', name: 'deep folder'});
 
   //dictionary for storing the selections data 
   //comprising an array of the currently selected items 
@@ -657,12 +657,13 @@ export default () => {
   // handle buttons for new files and folders
   const forms = document.forms as Forms;
   forms['files-actions'].addEventListener('submit', ({submitter: {name}}: {submitter: HTMLFormElement}) => {
-    let parentKey: number | string = 1; // root
+    let parentKey: number | string = tree.root.key; // root
 
     if(selections.items.length) {
       const item = selections.items.reverse().find(item => item.getAttribute('data-drop'));
       item!.querySelector('details')!.setAttribute('open', '');
       parentKey = item ? (item.attributes as DraggableNodeAttributes).name.value.split('_')[1] : parentKey;
+      console.log(parentKey);
     }
     if (name === 'new-file') {
       tree.insert(parentKey, self.crypto.randomUUID(), {type: 'FILE_GENERIC', name: ''});

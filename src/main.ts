@@ -1,5 +1,5 @@
 import './style.css'
-import './utility.css'
+import './utilities/utility.css'
 import './reactivity.css'
 
 import signInTemplate from './sign-in.html?raw';
