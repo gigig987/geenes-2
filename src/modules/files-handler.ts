@@ -1,6 +1,7 @@
 import Tree from './tree';
 import { Data, key } from './tree';
 import * as fileType from '../config/fileType.json';
+import { uuidv4 } from '@/utilities/utilities';
 
 declare global {
   interface Window {
@@ -11,10 +12,7 @@ declare global {
 interface Forms { [key: string]: any }
 
 interface DraggableFormsElements extends HTMLFormControlsCollection {
-  name: HTMLInputElement;
-}
-interface DraggableNodeAttributes extends NamedNodeMap {
-  name: Attr;
+  title: HTMLInputElement;
 }
 
 export type draggableItem = HTMLFormElement;
@@ -48,7 +46,7 @@ export default () => {
       }
     }
 
-    onAdd(parentKey: key, key: key, { type, name } : Data) {
+    onAdd(parentKey: key, key: key, { type, title } : Data) {
     // depending on the type load the right template
     // FOLDER | FILE_...
     const template = ((
@@ -63,12 +61,16 @@ export default () => {
     //assign to the fomr the key of the tree node
     if (form instanceof HTMLFormElement) {
       form.name = `file_${key}`;
-      const input = (form!.elements as DraggableFormsElements).name;
+      const input = (form!.elements as DraggableFormsElements).title;
       input.onchange = form!.onsubmit = () => tree.update(key,  Object.fromEntries(new FormData(form)));
       input.addEventListener('blur', ({ target }) => {
-        if (target && target instanceof Element) {
+        if (target && target instanceof HTMLInputElement) {
           target.setAttribute('readonly', '');
           target.setAttribute('disabled', '');
+          if (!target.value) {
+            const key = target.form!.name.split('_')[1];
+            tree.remove(key);
+          }
         }
       });
       input.addEventListener('keypress', (e: KeyboardEvent) => {
@@ -78,7 +80,6 @@ export default () => {
         }
       });
       form.addEventListener('submit', ({submitter: {name}}: {submitter: any}) => {
-        console.log(name);
         if (name === 'delete') {
           tree.remove(key);
         } else if (name === 'rename') {
@@ -95,14 +96,20 @@ export default () => {
        const forms = document.forms as Forms;
        
        // render the tree node name in an input
-       input.value = `${name}`;
-       // input.onclick = (e) => { console.log(e); e.preventDefault();};
+       input.value = `${title}`;
+
        // if there is an element before the input fill it the icon type
        if (input.previousElementSibling)
        input.previousElementSibling.textContent = `${fileType[type]}`;
        
        // finally render the new element in the <ol>
        forms[`file_${parentKey}`].querySelector('ol').appendChild(template);
+
+       if (!title) {
+        input.removeAttribute('readonly');
+        input.removeAttribute('disabled');
+        input.focus();
+       }
       }
     }
 
@@ -119,29 +126,20 @@ export default () => {
       // remove the selected element from its container form
       // parentElement is the container of the form and the first element in the template hierarchy
       forms[`file_${key}`].parentElement.remove();
+      clearSelections();
     }
-    onUpdate(key: key, { type, name } : Data): void {
-      console.log('update', name)
+    onUpdate(key: key, { type, title } : Data): void {
       // reference to the document forms
       const forms = document.forms as Forms;
       // update the selected element
-      const input = (forms[`file_${key}`]!.elements as DraggableFormsElements).name;
+      const input = (forms[`file_${key}`]!.elements as DraggableFormsElements).title;
 
-      input.value = `${name}`;
-      // input.onclick = (e) => { console.log(e); e.preventDefault();};
+      input.value = `${title}`;
       // if there is an element before the input fill it the icon type
       if (input.previousElementSibling)
       input.previousElementSibling.textContent = `${fileType[type]}`;
     }
   });
-
-  // tree.insert(1, 11, {type: 'FOLDER', name: 'Empty folder'});
-  // tree.insert(1, 12, {type: 'FOLDER', name: 'New folder'});
-  // tree.insert(1, 13, {type: 'FILE_COLOR', name: 'colors'});
-  // tree.insert(12, 121, {type: 'FILE_COLOR', name: 'ant.colors'});
-  // tree.insert(1, 14, {type: 'FILE_MEASURE', name: 'spacing'});
-  // tree.insert(12, 122, {type: 'FILE_FLOW', name: 'flusso'});
-  // tree.insert(12, 123, {type: 'FOLDER', name: 'deep folder'});
 
   //dictionary for storing the selections data 
   //comprising an array of the currently selected items 
@@ -297,8 +295,7 @@ export default () => {
   //mousedown event to implement single selection
   _.addEventListener('mousedown', function (e) {
     // get the form containing the clicked target
-    console.log(e.target)
-    if (e.target !instanceof HTMLElement) {
+    if (e.target! instanceof HTMLElement) {
      const form = getContainerForm(e.target);
 
     //if the element is a draggable item. the form is always contained within a li
@@ -344,6 +341,7 @@ export default () => {
 
   }
   }, false);
+
   //mouseup event to implement multiple selection
   _.addEventListener('mouseup', function (e) {
     // get the form containing the clicked target
@@ -409,123 +407,126 @@ export default () => {
 
   // TODO decide keyboard behaviour. tree files and folder can also be opened and renamed not only moved
   //keydown event to implement selection and abort
-  // _.addEventListener('keydown', function (e) {
-  //   //if the element is a grabbable item 
-  //   if ( e.target! instanceof HTMLElement && e.target.getAttribute('aria-grabbed')) {
-  //     //Space is the selection or unselection keystroke
-  //     if (e.key === ' ') {
-  //       //if the multiple selection modifier is pressed 
-  //       if (hasModifier(e)) {
-  //         //if the item's grabbed state is currently true
-  //         if (e.target.getAttribute('aria-grabbed') == 'true') {
-  //           //if this is the only selected item, clear dropeffect 
-  //           //from the target containers, which we must do first
-  //           //in case subsequent unselection sets owner to null
-  //           if (selections.items.length == 1) {
-  //             clearDropeffects();
-  //           }
+  _.addEventListener('keydown', function (e) {
+    //if the element is a grabbable item 
+    if ( e.target! instanceof HTMLElement) {
+      const form = getContainerForm(e.target);
+      refreshElements();
 
-  //           //unselect this item
-  //           removeSelection(e.target);
+      //Space is the selection or unselection keystroke
+      if (e.key === ' ') {
+        //if the multiple selection modifier is pressed 
+        if (hasModifier(e)) {
+          //if the item's grabbed state is currently true
+          if (form!.parentElement!.getAttribute('aria-grabbed') === 'true') {
+            //if this is the only selected item, clear dropeffect 
+            //from the target containers, which we must do first
+            //in case subsequent unselection sets owner to null
+            if (selections.items.length == 1) {
+              clearDropeffects();
+            }
 
-  //           //if we have any selections
-  //           //apply dropeffect to the target containers, 
-  //           //in case earlier selections were made by mouse
-  //           if (selections.items.length) {
-  //             addDropeffects();
-  //           }
+            //unselect this item
+            removeSelection(form!);
 
-  //           //if that was the only selected item
-  //           //then reset the owner container reference
-  //           if (!selections.items.length) {
-  //             selections.owner = null;
-  //           }
-  //         }
+            //if we have any selections
+            //apply dropeffect to the target containers, 
+            //in case earlier selections were made by mouse
+            if (selections.items.length) {
+              addDropeffects();
+            }
 
-  //         //else [if its grabbed state is currently false]
-  //         else {
-  //           //add this additional selection
-  //           addSelection(e.target);
+            //if that was the only selected item
+            //then reset the owner container reference
+            if (!selections.items.length) {
+              selections.owner = null;
+            }
+          }
 
-  //           //apply dropeffect to the target containers    
-  //           addDropeffects();
-  //         }
-  //       }
+          //else [if its grabbed state is currently false]
+          else {
+            //add this additional selection
+            addSelection(form!);
 
-  //       //else [if the multiple selection modifier is not pressed]
-  //       //and the item's grabbed state is currently false
-  //       else if (e.target.getAttribute('aria-grabbed') == 'false') {
-  //         //clear dropeffect from the target containers
-  //         clearDropeffects();
+            //apply dropeffect to the target containers    
+            addDropeffects();
+          }
+        }
 
-  //         //clear all existing selections
-  //         clearSelections();
+        //else [if the multiple selection modifier is not pressed]
+        //and the item's grabbed state is currently false
+        else if (form!.parentElement!.getAttribute('aria-grabbed') === 'false') {
+          //clear dropeffect from the target containers
+          clearDropeffects();
 
-  //         //add this new selection
-  //         addSelection(e.target);
+          //clear all existing selections
+          clearSelections();
 
-  //         //apply dropeffect to the target containers
-  //         addDropeffects();
-  //       }
+          //add this new selection
+          addSelection(form!);
 
-  //       //else [if modifier is not pressed and grabbed is already true]
-  //       else {
-  //         //apply dropeffect to the target containers    
-  //         addDropeffects();
-  //       }
+          //apply dropeffect to the target containers
+          addDropeffects();
+        }
 
-  //       //then prevent default to avoid any conflict with native actions
-  //       e.preventDefault();
-  //     }
+        //else [if modifier is not pressed and grabbed is already true]
+        else {
+          //apply dropeffect to the target containers    
+          addDropeffects();
+        }
 
-  //     //Modifier + M is the end-of-selection keystroke
-  //     if (e.key === 'm' && hasModifier(e)) {
-  //       //if we have any selected items
-  //       if (selections.items.length) {
-  //         //apply dropeffect to the target containers    
-  //         //in case earlier selections were made by mouse
-  //         addDropeffects();
+        //then prevent default to avoid any conflict with native actions
+        e.preventDefault();
+      }
 
-  //         //if the owner container is the last one, focus the first one
-  //         if (selections.owner == targets[targets.length - 1]) {
-  //           targets[0].focus();
-  //         }
+      //Modifier + M is the end-of-selection keystroke
+      if (e.key === 'm' && hasModifier(e)) {
+        //if we have any selected items
+        if (selections.items.length) {
+          //apply dropeffect to the target containers    
+          //in case earlier selections were made by mouse
+          addDropeffects();
 
-  //         //else [if it's not the last one], find and focus the next one
-  //         else {
-  //           for (var len = targets.length, i = 0; i < len; i++) {
-  //             if (selections.owner == targets[i]) {
-  //               targets[i + 1].focus();
-  //               break;
-  //             }
-  //           }
-  //         }
-  //       }
+          //if the owner container is the last one, focus the first one
+          if (selections.owner == targets[targets.length - 1]) {
+            targets[0].focus();
+          }
 
-  //       //then prevent default to avoid any conflict with native actions
-  //       e.preventDefault();
-  //     }
-  //   }
+          //else [if it's not the last one], find and focus the next one
+          else {
+            for (var len = targets.length, i = 0; i < len; i++) {
+              if (selections.owner == targets[i]) {
+                targets[i + 1].focus();
+                break;
+              }
+            }
+          }
+        }
 
-  //   //Escape is the abort keystroke (for any target element)
-  //   if (e.key === 'Escape') {
-  //     //if we have any selected items
-  //     if (selections.items.length) {
-  //       //clear dropeffect from the target containers
-  //       clearDropeffects();
+        //then prevent default to avoid any conflict with native actions
+        e.preventDefault();
+      }
+    }
 
-  //       //then set focus back on the last item that was selected, which is 
-  //       //necessary because we've removed tabindex from the current focus
-  //       selections.items[selections.items.length - 1].focus();
+    //Escape is the abort keystroke (for any target element)
+    if (e.key === 'Escape') {
+      //if we have any selected items
+      if (selections.items.length) {
+        //clear dropeffect from the target containers
+        clearDropeffects();
 
-  //       //clear all existing selections
-  //       clearSelections();
+        //then set focus back on the last item that was selected, which is 
+        //necessary because we've removed tabindex from the current focus
+        selections.items[selections.items.length - 1].focus();
 
-  //       //but don't prevent default so that native actions can still occur
-  //     }
-  //   }
+        //clear all existing selections
+        clearSelections();
 
-  // }, false);
+        //but don't prevent default so that native actions can still occur
+      }
+    }
+
+  }, false);
 
   //related variable is needed to maintain a reference to the 
   //dragleave's relatedTarget, since it doesn't have e.relatedTarget
@@ -596,8 +597,8 @@ export default () => {
 
       //append the selected items to the end of the target container
       for (var len = selections.items.length, i = 0; i < len; i++) {
-        const key = (selections.items[i]!.attributes as DraggableNodeAttributes).name.value.split('_')[1];
-        const parentKey = (selections.droptarget!.attributes as DraggableNodeAttributes).name.value.split('_')[1];
+        const key = selections.items[i]!.name.split('_')[1];
+        const parentKey = selections.droptarget!.name.split('_')[1];
         tree.move(parentKey, key);
       }
 
@@ -656,19 +657,55 @@ export default () => {
 
   // handle buttons for new files and folders
   const forms = document.forms as Forms;
+  // TODO refactor the template behaviour in an utility function
+
+  const fileTypeContentTemplate = ((
+    document
+    .getElementById('file-type-menu-list-content') as HTMLTemplateElement)!
+    .content.cloneNode(true) as DocumentFragment)
+    .children;
+
+  [...fileTypeContentTemplate].forEach(article => {
+    const fileTypeTemplate = ((
+      document
+      .getElementById('file-type-menu-list') as HTMLTemplateElement)!
+      .content.cloneNode(true) as DocumentFragment)
+      .firstElementChild;
+
+      fileTypeTemplate!.querySelector('label')!.appendChild(article);
+      const radio = fileTypeTemplate!.querySelector('input[type="radio"]') as HTMLInputElement;
+      const form = forms['files-actions'];
+      radio.value = article.getAttribute('data-type') || 'FILE_GENERIC'; 
+      radio!.onchange = form!.onsubmit = ({ target } : Event) =>  {
+        
+        const type = Object.fromEntries(new FormData(form) as any)['file-type'];
+        console.log('targte', target)
+        if (type) {
+          tree.insert(form!.elements['selected-cache'].value || tree.root.key, uuidv4(), {type: type, title: ''});
+          forms['files-actions'].elements['show-file-type-menu'].checked = false;
+          if (target instanceof HTMLInputElement) {
+            target!.checked = false;
+          }
+        }
+
+      };
+      
+      form.elements['file-type-menu'].querySelector('menu').appendChild(fileTypeTemplate);
+  });
+
   forms['files-actions'].addEventListener('submit', ({submitter: {name}}: {submitter: HTMLFormElement}) => {
     let parentKey: number | string = tree.root.key; // root
 
     if(selections.items.length) {
       const item = selections.items.reverse().find(item => item.getAttribute('data-drop'));
       item!.querySelector('details')!.setAttribute('open', '');
-      parentKey = item ? (item.attributes as DraggableNodeAttributes).name.value.split('_')[1] : parentKey;
-      console.log(parentKey);
+      parentKey = item ? item.name.split('_')[1] : parentKey;
     }
     if (name === 'new-file') {
-      tree.insert(parentKey, self.crypto.randomUUID(), {type: 'FILE_GENERIC', name: ''});
+      forms['files-actions'].elements['show-file-type-menu'].checked = true;
+      forms['files-actions'].elements['selected-cache'].value = parentKey;
     } else if (name === 'new-folder') {
-      tree.insert(parentKey, self.crypto.randomUUID(), {type: 'FOLDER', name: 'New folder'});
+      tree.insert(parentKey, self.crypto.randomUUID(), {type: 'FOLDER', title: ''});
     }
   });
 

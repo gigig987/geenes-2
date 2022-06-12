@@ -4,7 +4,7 @@ type Node = TreeNode;
 type ParentNode = Node | null;
 export type DataType = 'FILE_COLOR' | 'FILE_MEASURE' | 'FOLDER'
 export interface Data {
-  name: string;
+  title: string;
   type: DataType
 }
 export type key = string | number;

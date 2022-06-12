@@ -153,7 +153,7 @@ main form[name="navigation"] {
   --spacing: var(--space-outer);
 }
 
-form[name="navigation"] output {
+form[name="navigation"] output[name="files"] {
   position: absolute;
   top: 0;
   left: var(--size-nav, 48px);
@@ -186,7 +186,7 @@ form[name="navigation"] label {
 form[name="navigation"] input:checked + label {
   --icon-color: var(--color-on-surface);
 }
-form[name="navigation"] input:focus + label {
+form[name="navigation"] input:focus + * {
   outline: 1px dotted #212121;
   outline: 5px auto -webkit-focus-ring-color;
 }

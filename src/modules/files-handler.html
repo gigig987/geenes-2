@@ -6,7 +6,7 @@
           <summary>
             <div>
               <label>
-                <input name="name" type="text" readonly disabled value="" tabIndex="-1"/>
+                <input name="title" type="text" readonly disabled value="" tabIndex="-1"/>
               </label>
               <fieldset>
                 <menu class="flow-h">
@@ -29,11 +29,11 @@
     </li>
   </template>
   <template id="file-template">
-    <li draggable="true" aria-grabbed="false" tabIndex="0">
+    <li draggable="true" aria-grabbed="false">
       <form class="flow-h">
         <label name="file-type" class="flow-h">
           <span></span>
-          <input name="name" type="text" readonly  disabled value="" tabIndex="-1"/>
+          <input name="title" type="text" readonly  disabled value="" tabIndex="-1"/>
         </label>
         <fieldset>
           <menu class="flow-h">
@@ -51,15 +51,40 @@
       </form>
     </li>
   </template>
+  <template id="file-type-menu-list">
+    <li>
+      <label>
+        <input type="radio" name="file-type">
+      </label>
+    </li>
+  </template>
+  <template id="file-type-menu-list-content">
+    <article data-type="FILE_COLOR">
+      <h3>Color</h3>
+      <p>Generate variants from a base color</p>
+    </article>
+    <article data-type="FILE_MEASURE">
+      <h3>Size & Space</h3>
+      <p>Use these values for sizing and place objects</p>
+    </article>
+  </template>
     <details open>
       <summary>
-          Files
+          <h2>Files</h2>
         <aside>
           <!-- THIS empty form will not be rendered but it's used to display the others -->
           <form></form>
           <form name="files-actions">
             <menu class="flow-h">
-              <li><button class=" color-emoji" name="new-file" aria-label="new file">📄</button></li>
+              <li>
+                <button class=" color-emoji" name="new-file" aria-label="new file">📄</button>
+                <input name="show-file-type-menu" type="checkbox" hidden>
+                <input name="selected-cache" type="hidden" value="">
+                <output name="file-type-menu">
+                  <menu>
+                  </menu>
+                </output>
+              </li>
               <li><button class=" color-emoji" name="new-folder" aria-label="new folder">📁</button></li>
             </menu>
           </form>
@@ -148,5 +173,14 @@
   }
   #file-handler label[name="file-type"] {
     --spacing: var(--space-on-input-h);
+  }
+  #file-handler output[name="file-type-menu"] menu {
+    display: inline-flex;
+    flex-direction: column;
+    padding: var(--space-inner);
+    background: var(--color-surface);
+  }
+  #file-handler > details:not([open]) aside {
+    display: none;
   }
 </style>

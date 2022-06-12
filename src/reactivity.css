@@ -39,3 +39,13 @@ form[name="navigation"] input[name="main"][value="team"]:checked ~ output {
 form[name="navigation"] input[name="main"][value="comments"]:checked ~ output {
   display: initial;
 }
+
+
+form[name="files-actions"] output {
+  position: absolute;
+  display: initial;
+  left: 0;
+}
+form[name="files-actions"] input[name="show-file-type-menu"]:not(:checked) ~ output[name="file-type-menu"] {
+  display: none;
+}
