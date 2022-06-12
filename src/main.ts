@@ -2,20 +2,13 @@ import './style.css'
 import './utilities/utility.css'
 import './reactivity.css'
 
-import signInTemplate from './sign-in.html?raw';
-import signInCode from './sign-in';
-
-import filesHandlerTemplate from './modules/files-handler.html?raw';
-import filesHandlerCode from './modules/files-handler';
-
-// import ProjectModel from './models/project';
 import ModeModel from './models/mode';
 
 interface Forms { [key: string]: any }
 
 const modules = new Map();
-modules.set('sign-in', [signInTemplate, signInCode]);
-modules.set('files', [filesHandlerTemplate, filesHandlerCode]);
+modules.set('sign-in', './sign-in');
+// modules.set('files', './modules/files-handler');
 
 const forms = document.forms as Forms;
 
@@ -102,14 +95,25 @@ document.body.addEventListener('submit', e => e.preventDefault(), {capture: true
 
 // Navigation
 
+const form = forms.navigation;
+form!.elements.main.forEach((radio: HTMLFormElement) => {
+  radio.onchange = form!.onsubmit = () => modeCtrl.changeMode(Object.fromEntries(new FormData(form) as any)['main']);
+}); 
+
 const modeCtrl = new ModeModel(new class {
-  onChange(value: string, _old: string) {
-    const form = forms.navigation;
+  async onChange(value: string, _old: string) {
+    console.log(value)
     form!.elements.main.value = value;
-    form!.elements[value as string].innerHTML = modules.get(value)[0];
-    modules.get(value)[1]();
-    form!.elements.main.forEach((radio: HTMLFormElement) => {
-      radio.onchange = form!.onsubmit = () => modeCtrl.changeMode(Object.fromEntries(new FormData(form) as any)['main']);
-    }); 
+
+    let template;
+    let code;
+    if (value === 'files') {
+      template = await import(`./modules/files-handler.html?raw`);
+      code = await import(`./modules/files-handler`);
+    } else {
+      return;
+    }
+    form!.elements[value as string].innerHTML = template.default;//modules.get(value)[0];
+    code.default();
   }
 });

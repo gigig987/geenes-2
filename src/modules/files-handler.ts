@@ -2,6 +2,7 @@ import Tree from './tree';
 import { Data, key } from './tree';
 import * as fileType from '../config/fileType.json';
 import { uuidv4 } from '@/utilities/utilities';
+import './files-handler.css'
 
 declare global {
   interface Window {
