@@ -5,6 +5,7 @@ type ParentNode = Node | null;
 export type DataType = 'FILE_COLOR' | 'FILE_MEASURE' | 'FOLDER'
 export interface Data {
   title: string;
+  
   type: DataType
 }
 export type key = string | number;

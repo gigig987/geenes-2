@@ -11,9 +11,13 @@
     background-color: var(--color-surface-deep);
   }
 
-  *[aria-grabbed="true"] > form:not([data-drop="true"]), *[aria-grabbed="true"] > form > details > summary {
-    outline: 1px dotted #212121;
-    outline: 5px auto -webkit-focus-ring-color;
+  /* *[aria-grabbed="true"] > form:not([data-drop="true"]), *[aria-grabbed="true"] > form > details > summary {
+    /* outline: 1px dotted #212121;
+    outline: 5px auto -webkit-focus-ring-color; 
+  }
+  */
+  *[aria-grabbed="true"] {
+    background-color: var(--color-primary);
   }
   #file-handler {
     height: 100%;
@@ -82,4 +86,9 @@
   }
   #file-handler > details:not([open]) aside {
     display: none;
+  }
+
+  #file-handler summary h2 {
+    display: inline-flex;
+    margin: 0;
   }

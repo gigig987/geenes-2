@@ -170,9 +170,9 @@ export default () => {
 
     //or if that's already happened then compare it with this item's parent
     //and if they're not the same container, return to prevent selection
-    else if (selections.owner !== getContainerForm(item.parentNode!)) {
-      return;
-    }
+    // else if (selections.owner !== getContainerForm(item.parentNode!)) {
+    //   return;
+    // }
 
     //set this item's grabbed state
     item.parentElement!.setAttribute('aria-grabbed', 'true');
@@ -227,7 +227,7 @@ export default () => {
         targets[i].getAttribute('aria-dropeffect') == 'none'
       ) {
         targets[i].setAttribute('aria-dropeffect', 'move');
-        targets[i].setAttribute('tabindex', '0');
+        // targets[i].setAttribute('tabindex', '0');
       }
     }
 
@@ -240,7 +240,7 @@ export default () => {
         items[i].getAttribute('aria-grabbed')
       ) {
         items[i].removeAttribute('aria-grabbed');
-        items[i].removeAttribute('tabindex');
+        // items[i].removeAttribute('tabindex');
       }
     }
   }
@@ -253,7 +253,7 @@ export default () => {
       for (var len = targets.length, i = 0; i < len; i++) {
         if (targets[i].getAttribute('aria-dropeffect') != 'none') {
           targets[i].setAttribute('aria-dropeffect', 'none');
-          targets[i].removeAttribute('tabindex');
+          // targets[i].removeAttribute('tabindex');
         }
       }
 
@@ -262,10 +262,10 @@ export default () => {
       for (var len = items.length, i = 0; i < len; i++) {
         if (!items[i].getAttribute('aria-grabbed')) {
           items[i].setAttribute('aria-grabbed', 'false');
-          items[i].setAttribute('tabindex', '0');
+          // items[i].setAttribute('tabindex', '0');
         }
         else if (items[i].getAttribute('aria-grabbed') == 'true') {
-          items[i].setAttribute('tabindex', '0');
+          // items[i].setAttribute('tabindex', '0');
         }
       }
     }
@@ -367,6 +367,7 @@ export default () => {
         else {
           //add this additional selection
           addSelection(form!);
+          console.log('adding', form, selections)
         }
       }
   }
@@ -408,105 +409,136 @@ export default () => {
 
   // TODO decide keyboard behaviour. tree files and folder can also be opened and renamed not only moved
   //keydown event to implement selection and abort
+
+  let lastIndex = -1;
+  const filesVisible = [];
+  
   _.addEventListener('keydown', function (e) {
     //if the element is a grabbable item 
     if ( e.target! instanceof HTMLElement) {
-      const form = getContainerForm(e.target);
+      const form = getContainerForm(document.activeElement);
       refreshElements();
-
-      //Space is the selection or unselection keystroke
-      if (e.key === ' ') {
+      // check if we are focused on the main root
+      if (form!.dataset.root) {
         //if the multiple selection modifier is pressed 
-        if (hasModifier(e)) {
-          //if the item's grabbed state is currently true
-          if (form!.parentElement!.getAttribute('aria-grabbed') === 'true') {
-            //if this is the only selected item, clear dropeffect 
-            //from the target containers, which we must do first
-            //in case subsequent unselection sets owner to null
-            if (selections.items.length == 1) {
-              clearDropeffects();
-            }
-
-            //unselect this item
-            removeSelection(form!);
-
-            //if we have any selections
-            //apply dropeffect to the target containers, 
-            //in case earlier selections were made by mouse
-            if (selections.items.length) {
-              addDropeffects();
-            }
-
-            //if that was the only selected item
-            //then reset the owner container reference
-            if (!selections.items.length) {
-              selections.owner = null;
-            }
-          }
-
-          //else [if its grabbed state is currently false]
-          else {
-            //add this additional selection
-            addSelection(form!);
-
-            //apply dropeffect to the target containers    
-            addDropeffects();
-          }
-        }
-
-        //else [if the multiple selection modifier is not pressed]
-        //and the item's grabbed state is currently false
-        else if (form!.parentElement!.getAttribute('aria-grabbed') === 'false') {
-          //clear dropeffect from the target containers
-          clearDropeffects();
-
+        if (!hasModifier(e)) {
           //clear all existing selections
           clearSelections();
-
-          //add this new selection
-          addSelection(form!);
-
-          //apply dropeffect to the target containers
-          addDropeffects();
         }
 
-        //else [if modifier is not pressed and grabbed is already true]
-        else {
-          //apply dropeffect to the target containers    
-          addDropeffects();
+        if (e.key === 'ArrowDown' ) {
+          console.log('moving down', lastIndex)
+          lastIndex++;
+        } else if (e.key === 'ArrowUp') {
+          console.log('moving up', lastIndex)
+          lastIndex--;
+        } else if (e.key === 'ArrowRight') {
+          console.log('opening', lastIndex)
+          const d = e.target.children[lastIndex].querySelector('details');
+          d?.setAttribute('open', '');
+        } else if (e.key === 'ArrowLeft') {
+          console.log('closing', lastIndex)
+          const d = e.target.children[lastIndex].querySelector('details');
+          d?.removeAttribute('open');
         }
-
-        //then prevent default to avoid any conflict with native actions
-        e.preventDefault();
+        const f = e.target.children[lastIndex].querySelector('form');
+        addSelection(f!);
       }
+
+
+      //Tab is the selection or unselection keystroke
+      // if (e.key === 'Tab') {
+      //   //if the multiple selection modifier is pressed 
+      //   if (hasModifier(e)) {
+      //     //if the item's grabbed state is currently true
+      //     if (form!.parentElement!.getAttribute('aria-grabbed') === 'true') {
+      //       //if this is the only selected item, clear dropeffect 
+      //       //from the target containers, which we must do first
+      //       //in case subsequent unselection sets owner to null
+      //       if (selections.items.length == 1) {
+      //         clearDropeffects();
+      //       }
+
+      //       //unselect this item
+      //       removeSelection(form!);
+
+      //       //if we have any selections
+      //       //apply dropeffect to the target containers, 
+      //       //in case earlier selections were made by mouse
+      //       if (selections.items.length) {
+      //         addDropeffects();
+      //       }
+
+      //       //if that was the only selected item
+      //       //then reset the owner container reference
+      //       if (!selections.items.length) {
+      //         selections.owner = null;
+      //       }
+      //     }
+
+      //     //else [if its grabbed state is currently false]
+      //     else {
+      //       //add this additional selection
+      //       addSelection(form!);
+
+      //       //apply dropeffect to the target containers    
+      //       addDropeffects();
+      //     }
+      //   }
+
+      //   //else [if the multiple selection modifier is not pressed]
+      //   //and the item's grabbed state is currently false
+      //   else if (form!.parentElement!.getAttribute('aria-grabbed') === 'false') {
+      //     //clear dropeffect from the target containers
+      //     clearDropeffects();
+
+      //     //clear all existing selections
+      //     clearSelections();
+
+      //     //add this new selection
+      //     addSelection(form!);
+
+      //     //apply dropeffect to the target containers
+      //     addDropeffects();
+      //   }
+
+      //   //else [if modifier is not pressed and grabbed is already true]
+      //   else {
+      //     //apply dropeffect to the target containers    
+      //     addDropeffects();
+      //   }
+
+      //   //then prevent default to avoid any conflict with native actions
+      //   // e.preventDefault();
+      // }
 
       //Modifier + M is the end-of-selection keystroke
-      if (e.key === 'm' && hasModifier(e)) {
-        //if we have any selected items
-        if (selections.items.length) {
-          //apply dropeffect to the target containers    
-          //in case earlier selections were made by mouse
-          addDropeffects();
+      // if (e.key === 'm' && hasModifier(e)) {
+      //   //if we have any selected items
+      //   if (selections.items.length) {
+      //     //apply dropeffect to the target containers    
+      //     //in case earlier selections were made by mouse
+      //     addDropeffects();
 
-          //if the owner container is the last one, focus the first one
-          if (selections.owner == targets[targets.length - 1]) {
-            targets[0].focus();
-          }
+      //     //if the owner container is the last one, focus the first one
+      //     if (selections.owner == targets[targets.length - 1]) {
+      //       targets[0].focus();
+      //     }
 
-          //else [if it's not the last one], find and focus the next one
-          else {
-            for (var len = targets.length, i = 0; i < len; i++) {
-              if (selections.owner == targets[i]) {
-                targets[i + 1].focus();
-                break;
-              }
-            }
-          }
-        }
+      //     //else [if it's not the last one], find and focus the next one
+      //     else {
+      //       for (var len = targets.length, i = 0; i < len; i++) {
+      //         if (selections.owner == targets[i]) {
+      //           targets[i + 1].focus();
+      //           break;
+      //         }
+      //       }
+      //     }
+      //   }
 
-        //then prevent default to avoid any conflict with native actions
-        e.preventDefault();
-      }
+      //   //then prevent default to avoid any conflict with native actions
+      //   e.preventDefault();
+      // }
     }
 
     //Escape is the abort keystroke (for any target element)
@@ -518,7 +550,7 @@ export default () => {
 
         //then set focus back on the last item that was selected, which is 
         //necessary because we've removed tabindex from the current focus
-        selections.items[selections.items.length - 1].focus();
+        // selections.items[selections.items.length - 1].focus();
 
         //clear all existing selections
         clearSelections();
@@ -629,32 +661,32 @@ export default () => {
   }, false);
 
   //keydown event to implement items being dropped into targets
-  _.addEventListener('keydown', function (e) {
-    //if the element is a drop target container
-    if (e.target! instanceof HTMLElement && e.target.getAttribute('aria-dropeffect')) {
-      //Enter or Modifier + M is the drop keystroke
-      if (e.key === 'Enter' || (e.key === 'm' && hasModifier(e))) {
-        //append the selected items to the end of the target container
-        for (var len = selections.items.length, i = 0; i < len; i++) {
-          e.target.appendChild(selections.items[i]);
-        }
+  // _.addEventListener('keydown', function (e) {
+  //   //if the element is a drop target container
+  //   if (e.target! instanceof HTMLElement && e.target.getAttribute('aria-dropeffect')) {
+  //     //Enter or Modifier + M is the drop keystroke
+  //     if (e.key === 'Enter' || (e.key === 'm' && hasModifier(e))) {
+  //       //append the selected items to the end of the target container
+  //       for (var len = selections.items.length, i = 0; i < len; i++) {
+  //         e.target.appendChild(selections.items[i]);
+  //       }
 
-        //clear dropeffect from the target containers
-        clearDropeffects();
+  //       //clear dropeffect from the target containers
+  //       clearDropeffects();
 
-        //then set focus back on the last item that was selected, which is 
-        //necessary because we've removed tabindex from the current focus
-        selections.items[selections.items.length - 1].focus();
+  //       //then set focus back on the last item that was selected, which is 
+  //       //necessary because we've removed tabindex from the current focus
+  //       // selections.items[selections.items.length - 1].focus();
 
-        //reset the selections array
-        clearSelections();
+  //       //reset the selections array
+  //       clearSelections();
 
-        //prevent default to to avoid any conflict with native actions
-        e.preventDefault();
-      }
-    }
+  //       //prevent default to to avoid any conflict with native actions
+  //       e.preventDefault();
+  //     }
+  //   }
 
-  }, false);
+  // }, false);
 
   // handle buttons for new files and folders
   const forms = document.forms as Forms;
@@ -680,7 +712,6 @@ export default () => {
       radio!.onchange = form!.onsubmit = ({ target } : Event) =>  {
         
         const type = Object.fromEntries(new FormData(form) as any)['file-type'];
-        console.log('targte', target)
         if (type) {
           tree.insert(form!.elements['selected-cache'].value || tree.root.key, uuidv4(), {type: type, title: ''});
           forms['files-actions'].elements['show-file-type-menu'].checked = false;
@@ -699,7 +730,8 @@ export default () => {
 
     if(selections.items.length) {
       const item = selections.items.reverse().find(item => item.getAttribute('data-drop'));
-      item!.querySelector('details')!.setAttribute('open', '');
+      console.log(item)
+      item?.querySelector('details')!.setAttribute('open', '');
       parentKey = item ? item.name.split('_')[1] : parentKey;
     }
     if (name === 'new-file') {

@@ -1,9 +1,9 @@
 <article id="file-handler">
   <template id="folder-template">
-    <li draggable="true" aria-grabbed="false" >
+    <li draggable="true" aria-grabbed="false">
       <form aria-dropeffect="none" data-drop="true" class="flow-h">
       <details class="folder">
-          <summary>
+          <summary tabIndex="-1">
             <div>
               <label>
                 <input name="title" type="text" readonly disabled value="" tabIndex="-1"/>
@@ -33,7 +33,7 @@
       <form class="flow-h">
         <label name="file-type" class="flow-h">
           <span></span>
-          <input name="title" type="text" readonly  disabled value="" tabIndex="-1"/>
+          <input name="title" type="text" readonly disabled value="" tabIndex="-1"/>
         </label>
         <fieldset>
           <menu class="flow-h">
@@ -91,8 +91,13 @@
           </aside>
         </summary>
         <form aria-dropeffect="none" data-drop="true" data-root="true">
-          <ol>
+          <ol tabIndex="0">
           </ol>
         </form>
+    </details>
+    <details>
+      <summary>
+        External
+      </summary>
     </details>
 </article>
