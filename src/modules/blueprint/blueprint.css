@@ -1,0 +1,332 @@
+
+/**
+ * @section Base Styles
+ */
+
+#world-container {
+	position: absolute;
+	will-change: transform;
+}
+
+#world-container.small-zoom *[small] {
+	content-visibility: hidden;
+	opacity: 0.4;
+}
+
+body.pan-mode, body.pan-mode * {
+	cursor: grab;
+}
+
+#world-wrapper {
+	position: relative;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+#world-wrapper .hidden {
+	content-visibility: hidden;
+}
+
+#world-wrapper div.frame {
+	background: white;
+	/* --shadow-size: calc(10px / var(--scale));
+	box-shadow: 0 0 var(--shadow-size) rgb(0 0 0 / 20%); */
+	box-shadow: inherit;
+}
+
+#world-wrapper .placeholder {
+	background: lightblue;
+}
+
+#world-wrapper .clip-content {
+	overflow: hidden;
+}
+
+#world-wrapper main {
+	width: 100%;
+	height: 100%;
+}
+
+div.frame {
+	position: absolute;
+	--angle: 0deg;
+	transform-origin: center center;
+	transform: translate(-50%, -50%) rotate(var(--angle));
+}
+div.frame .title {
+	content-visibility: auto;
+	display: block;
+	position: absolute;
+	margin-top: -20px;
+	z-index: 1;
+	cursor: pointer;
+	background: transparent;
+	min-width: 48px;
+	max-width: calc(150px * var(--scale));
+	transform: scale3d(calc(1 / var(--scale)), calc(1 / var(--scale)), 1);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	will-change: transform;
+	transform-origin: 0 100%;
+	font-size: small;
+	color: gray;
+}
+div.frame[data-orient=L] .title {
+	transform: scale3d(calc(1 / var(--scale)), calc(1 / var(--scale)), 1) rotate(-90deg);
+	bottom: 0;
+	margin-left: -10px;
+}
+div.frame[data-orient=LL] .title {
+	transform: scale3d(calc(1 / var(--scale)), calc(1 / var(--scale)), 1) rotate(-180deg);
+	bottom: 0;
+	left: 100%;
+	margin-bottom: -10px;
+}
+div.frame[data-orient=LLL] .title {
+	transform: scale3d(calc(1 / var(--scale)), calc(1 / var(--scale)), 1) rotate(-270deg);
+	top: 0;
+	left: 100%;
+	margin-left: 10px;
+}
+div.frame[data-orient=R] .title {
+	transform: scale3d(calc(1 / var(--scale)), calc(1 / var(--scale)), 1) rotate(-270deg);
+	top: 0;
+	left: 100%;
+	margin-left: 10px;
+}
+
+div.frame:hover {
+	z-index: 1;
+}
+
+.frame:hover::after {
+	display: block;
+	position: absolute;
+	z-index: -1;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	content: "";
+	width: 100%;
+	height: 100%;
+	border: max(calc(1px / var(--scale)), 1px) solid var(--primary-accent-color);
+	transform: translate3d(-1px, -1px, 0);
+	clip-path: inset(calc(0.9px - calc(1px / var(--scale))));
+	/* box-sizing: border-box; */
+}
+
+.size-badge {
+	display: block;
+	position: absolute;
+	border-radius: 10px;
+	padding: 4px 8px;
+	background: dodgerblue;
+	color: white;
+	font-size: small;
+}
+
+* {
+	cursor: default;
+}
+
+.resizer {
+	--corner-size: 10px;
+	--full-size: 6px;
+	--rotate-size: 16px;
+	--angle: 0deg;
+	display: block;
+	position: absolute;
+	z-index: 1;
+	background: rgba(10, 50, 170, 0.15);
+	transform-origin: center center;
+	transform: translate(-50%, -50%) rotate(var(--angle));
+}
+.resizer::before {
+	display: block;
+	content: "";
+	width: 100%;
+	height: 100%;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	border: max(calc(1px / var(--scale)), 1px) solid dodgerblue;
+	transform: translate3d(-1px, -1px, 0);
+	clip-path: inset(calc(0.9px - calc(1px / var(--scale))));
+}
+.resizer .corner {
+	width: var(--corner-size);
+	height: var(--corner-size);
+	background: white;
+	position: absolute;
+}
+.resizer .corner::before {
+	display: block;
+	content: "";
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+	border: 1px solid dodgerblue;
+	box-sizing: border-box;
+}
+.resizer .corner.top-left {
+	left: 0;
+	top: 0;
+	transform: translate3d(calc(-.5 * var(--corner-size)), calc(-.5 * var(--corner-size)), 0) scale(calc( 1 / var(--scale)));
+	cursor: nwse-resize;
+	/*resizer cursor*/
+}
+.resizer .corner.top-right {
+	right: 0;
+	top: 0;
+	transform: translate3d(calc(.5 * var(--corner-size)), calc(-.5 * var(--corner-size)), 0) scale(calc( 1 / var(--scale)));
+	cursor: nesw-resize;
+}
+.resizer .corner.bottom-left {
+	left: 0;
+	bottom: 0;
+	transform: translate3d(calc(-.5 * var(--corner-size)), calc(.5 * var(--corner-size)), 0) scale(calc( 1 / var(--scale)));
+	cursor: nesw-resize;
+}
+.resizer .corner.bottom-right {
+	right: 0;
+	bottom: 0;
+	transform: translate3d(calc(.5 * var(--corner-size)), calc(.5 * var(--corner-size)), 0) scale(calc( 1 / var(--scale)));
+	cursor: nwse-resize;
+}
+.resizer .full {
+	background: transparent;
+	position: absolute;
+}
+.resizer .full.top {
+	top: 0;
+	transform: translate3d(0px, calc(calc(-.5 * var(--full-size)) / var(--scale)), 0);
+	height: calc( var(--full-size) / var(--scale));
+	width: 100%;
+	cursor: ns-resize;
+}
+.resizer .full.bottom {
+	bottom: 0;
+	transform: translate3d(0px, calc(calc(.5 * var(--full-size)) / var(--scale)), 0);
+	height: calc( var(--full-size) / var(--scale));
+	width: 100%;
+	cursor: ns-resize;
+}
+.resizer .full.left {
+	left: 0;
+	top: 0;
+	transform: translate3d(calc(calc(-.5 * var(--full-size)) / var(--scale)), 0px, 0);
+	width: calc( var(--full-size) / var(--scale));
+	height: 100%;
+	cursor: ew-resize;
+}
+.resizer .full.right {
+	right: 0;
+	top: 0;
+	transform: translate3d(calc(calc(.5 * var(--full-size))/ var(--scale)), 0px, 0);
+	width: calc( var(--full-size) / var(--scale));
+	height: 100%;
+	cursor: ew-resize;
+}
+.resizer .rotate-handle {
+	width: calc(var(--rotate-size) / var(--scale));
+	height: calc(var(--rotate-size) / var(--scale));
+	background: transparent;
+	position: absolute;
+	cursor: url("https://findicons.com/files/icons/1620/crystal_project/16/rotate_ccw.png"), auto;
+}
+.resizer .rotate-handle::before {
+	display: block;
+	content: "";
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+	box-sizing: border-box;
+}
+.resizer .rotate-handle.top-left {
+	left: 0;
+	top: 0;
+	transform: translate3d(calc(-15px / var(--scale)), calc(-15px / var(--scale)), 0);
+}
+.resizer .rotate-handle.top-right {
+	right: 0;
+	top: 0;
+	transform: translate3d(calc(15px / var(--scale)), calc(-15px / var(--scale)), 0);
+}
+.resizer .rotate-handle.bottom-left {
+	left: 0;
+	bottom: 0;
+	transform: translate3d(calc(-15px / var(--scale)), calc(15px / var(--scale)), 0);
+}
+.resizer .rotate-handle.bottom-right {
+	right: 0;
+	bottom: 0;
+	transform: translate3d(calc(15px / var(--scale)), calc(15px / var(--scale)), 0);
+}
+
+.ruler {
+	--increment: 100px;
+	position: absolute;
+	top: 0;
+	--height: 20px;
+	background: var(--color-surface-raised);
+}
+.ruler.horizontal {
+	--delta-point-x: 0px;
+	--point-x: 0px;
+	--values-x: "";
+	width: 100vw;
+	height: var(--height);
+}
+.ruler.horizontal::before {
+	background: linear-gradient(90deg, var(--color-on-surface) 1px, transparent 0) -0.5px/var(--increment);
+	background-position-x: var(--point-x);
+}
+.ruler.horizontal:after {
+	transform: translate3d(calc(-1 * var(--increment) + var(--delta-point-x)), 0, 0);
+	content: var(--values-x);
+}
+.ruler.vertical {
+	--delta-point-y: 0px;
+	--point-y: 0px;
+	--values-y: "";
+	width: 100vh;
+	height: var(--height);
+	transform-origin: 0 0;
+	transform: rotate(-90deg) translate3d(-100vh, 0, 0);
+}
+.ruler.vertical::before {
+	background: linear-gradient(-90deg, var(--color-on-surface) 1px, transparent 0) -0.5px/var(--increment);
+	background-position-x: calc( -1 * var(--point-y) + 100vh);
+}
+.ruler.vertical:after {
+	transform: translate3d(calc(1 * var(--increment) - var(--delta-point-y)), 0, 0) scale3d(-1, -1, 1);
+	content: var(--values-y);
+}
+.ruler:before {
+	display: block;
+	width: 100%;
+	height: 33%;
+	content: "";
+	position: absolute;
+	top: 80%;
+}
+.ruler:after {
+	display: block;
+	font: 11px ubuntu mono, consolas, monaco, monospace;
+	color: var(--color-on-surface-raised);
+	word-spacing: calc(var(--increment) - var(--spacing));
+	text-indent: calc(var(--increment) - var(--indent));
+	white-space: nowrap;
+}
+.ruler.origin {
+	width: var(--height);
+	height: var(--height);
+	border: 1px solid var(--color-stroke);
+	background: var(--color-surface-raised);
+}
+
+.margin-r-xs {
+	margin-right: var(--spacing-xs);
+}

@@ -219,3 +219,8 @@ footer {
 details > summary aside {
   display: inline-flex;
 }
+
+article#blueprint {
+  position: relative;
+  overflow: hidden;
+}

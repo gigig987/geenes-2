@@ -1,8 +1,12 @@
 import './style.css'
-import './utilities/utility.css'
+import '@/utilities/utility.css'
 import './reactivity.css'
 
 import ModeModel from './models/mode';
+import blueprint from './modules/blueprint/blueprint';
+import './modules/blueprint/blueprint.css';
+
+import { state }  from '@/utilities/state';
 
 interface Forms { [key: string]: any }
 
@@ -43,10 +47,15 @@ const resizeProjectNameField = (): void => {
   field.size = field.value.length || 1;
 }
 
+const loadBlueprint = (): void => {
+  const container = document.getElementById('blueprint');
+  blueprint(container!);
+}
+
 const firstLoad = (): void => {
   setOverlay();
   resizeProjectNameField();
-  // currentProject.createProject({name: 'ciaoooo'});
+  loadBlueprint();
 }
 
 
@@ -117,3 +126,14 @@ const modeCtrl = new ModeModel(new class {
     code.default();
   }
 });
+
+// Footer
+const fpsCounter = document.querySelector('footer .fps-counter');
+
+const renderFpsCounter = () => {
+  fpsCounter!.innerHTML = `${state.fps} FPS`;
+};
+
+
+// Subscribe the render function to state changes
+window.subscribers.push(renderFpsCounter);
