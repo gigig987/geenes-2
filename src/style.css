@@ -147,7 +147,7 @@ main {
 main form[name="navigation"] {
   display: inline-flex;
   position: relative;
-  overflow-x: hidden;
+  /* overflow-x: hidden; */
 
   text-align: center;
   --spacing: var(--space-outer);

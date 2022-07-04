@@ -15,7 +15,12 @@ interface Forms { [key: string]: any }
 interface DraggableFormsElements extends HTMLFormControlsCollection {
   title: HTMLInputElement;
 }
-
+interface DropEvent {
+  coord: {
+    x: number;
+    y: number;
+  }
+}
 export type draggableItem = HTMLFormElement;
 export interface draggableElements {
   items: Array<draggableItem>
@@ -376,6 +381,7 @@ export default () => {
 
   //dragstart event to initiate mouse dragging
   _.addEventListener('dragstart', function (e) {
+    _.classList.add('dragging');
     if (e.target !instanceof HTMLElement) {
       const form = e.target.querySelector('form');
       //if the element's parent is not the owner, then block this event
@@ -567,6 +573,7 @@ export default () => {
 
   //dragenter event to set that variable
   _.addEventListener('dragenter', function (e) {
+    console.log('entering', e.target)
     if (e.target instanceof HTMLElement) {
       related = e.target;
     }
@@ -623,9 +630,15 @@ export default () => {
   //dragend event to implement items being validly dropped into targets,
   //or invalidly dropped elsewhere, and to clean-up the interface either way
   _.addEventListener('dragend', function (e) {
+    console.log('end', related)
+    _.classList.remove('dragging');
+    if (related?.classList.contains('target-blueprint')) {
+      const data: DropEvent = {coord: { x: e.clientX, y: e.clientY }}
+      const event = new CustomEvent('blueprintdrop', {detail: data});
+      document.dispatchEvent(event);
+    }
     //if we have a valid drop target reference
     //(which implies that we have some selected items)
-
     if (selections.droptarget instanceof HTMLFormElement) {
 
       //append the selected items to the end of the target container

@@ -92,3 +92,21 @@
     display: inline-flex;
     margin: 0;
   }
+
+#file-handler .target-blueprint {
+  content: '';
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  background: var(--color-primary);
+  position: absolute;
+  top: 0;
+  left: 100%;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+}
+#file-handler.dragging .target-blueprint {
+  opacity: 0.2;
+  pointer-events: all;
+}

@@ -27,22 +27,23 @@ export default (body: HTMLElement) => {
 
   for (var i = totFrames; i--;) {
     const frame: HTMLDivElement = document.createElement("div");
-    const w = (Math.random() * 300 | 0)
-    const h = (Math.random() * 300 | 0)
+    const w = (Math.random() * 300 | 0);
+    const h = (Math.random() * 300 | 0);
     frame.style.position = "absolute";
     frame.style.top = (Math.random() * 1500 - Math.round(totFrames * 1) | 0) + 'px';
     frame.style.left = (Math.random() * 1500 - Math.round(totFrames * 1) | 0) + 'px';
-    frame.style.width = `${w}px`
-    frame.style.height = `${h}px`
-    frame.classList.add('frame')
+    frame.style.width = `${w}px`;
+    frame.style.height = `${h}px`;
+    frame.classList.add('frame');
+    frame.setAttribute('draggable', '');
     frame.innerHTML = `
-	<label class="title" text> Frame ${i}</label>
+	<label class="title" draggable text> Frame ${i}</label>
 	<main class="clip-content">
 		<p text>
 			<span class="margin-r-xs">🎃</span>pumpkin
 		</p>
 	</main>
-	`
+	`;
 
     if (w < 200 || h < 200) {
       frame.setAttribute('small', '')
@@ -105,11 +106,10 @@ export default (body: HTMLElement) => {
     if (m.getCurrent() === modeOptions.TEXT_EDIT) return
     e.preventDefault()
     const key: string | number = e.code || e.keyCode
-    console.log(key)
     if (key == 32 || key == 'Space') {
       //spacebar
       m.setCurrent(modeOptions.PAN)
-      document.body.classList.add('pan-mode')
+      body.classList.add('pan-mode')
     }
   };
   body.onkeyup = (e) => {
@@ -119,34 +119,36 @@ export default (body: HTMLElement) => {
     if (key == 32 || key == 'Space') {
       //spacebar
       m.resetPrevious()
-      document.body.classList.remove('pan-mode')
+      body.classList.remove('pan-mode')
     }
   };
 
   let panning: boolean = false;
   let start = { x: 0, y: 0 };
 
-  (body.querySelector('#world-wrapper') as HTMLElement)!.onmousedown = (e: MouseEvent) => {
+  body!.onmousedown = (e: MouseEvent) => {
     e.preventDefault();
-    const target = e.target as HTMLElement
-
-    const { pointX, pointY, scale } = world.getProperties()
+    const target = e.target as HTMLElement;
+    console.log('mouse down', target)
+    
+    const { pointX, pointY, scale } = world.getProperties();
     if (m.getCurrent() === modeOptions.PAN) {
-      panning = true
+      panning = true;
       start = {
         x: e.clientX - (pointX || 0),
         y: e.clientY - (pointY || 0)
-      }
+      };
     } else if (m.getCurrent() === modeOptions.SELECT) {
-      interactions.setPrevMousePosition({ x: e.clientX / scale, y: e.clientY / scale })
+      interactions.setPrevMousePosition({ x: e.clientX / scale, y: e.clientY / scale });
       if (target.hasAttribute('resize-handle')) {
-        interactions.initResize(e)
+        interactions.initResize(e);
       } else if (target.hasAttribute('rotate-handle')) {
-        interactions.initRotate({ x: e.clientX, y: e.clientY })
+        interactions.initRotate({ x: e.clientX, y: e.clientY });
+      } else if (target.hasAttribute('draggable')) {
+        selectElement(target);
+        interactions.initMoving(e);
       } else {
-        selectElement(target)
-        interactions.initMoving(e)
-
+        deselectElement(interactions.getTarget());
       }
     }
   };
@@ -305,12 +307,11 @@ export default (body: HTMLElement) => {
   // }
 
   const selectElement = (el: HTMLElement) => {
-    console.log(el)
-    deselectElement(interactions.getTarget())
-    if (el === document.body) {
-      return
+    deselectElement(interactions.getTarget());
+    if (el === body) {
+      return;
     } else if (el === interactions.getResizeHolder()) {
-      return
+      return;
     }
     if (el.tagName === 'MAIN' || el.tagName === 'LABEL') {
       el = el.parentElement ? el.parentElement : el
@@ -376,7 +377,7 @@ export default (body: HTMLElement) => {
 
   body.addEventListener('resize', () => console.log('heey'));
 
-  // /// RENDERING (optional)
+  /// RENDERING (optional)
   let previousTime = now();
   let frameCount = 0
   function render() {
@@ -392,7 +393,7 @@ export default (body: HTMLElement) => {
   	_requestAnimationFrame(render);
   }
 
-
+  document.addEventListener('blueprintdrop', (e) => console.log(e));
   render();
 };
 

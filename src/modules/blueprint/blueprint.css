@@ -13,7 +13,7 @@
 	opacity: 0.4;
 }
 
-body.pan-mode, body.pan-mode * {
+.pan-mode, .pan-mode * {
 	cursor: grab;
 }
 
