@@ -8,6 +8,8 @@ import { state }  from '@/utilities/state';
 
 export default (body: HTMLElement) => {
   const {x: originX, y: originY} = body.getBoundingClientRect();
+  body.style.setProperty('--origin-x', `${originX}px`);
+  body.style.setProperty('--origin-y', `${originY}px`);
   const world = new World(body);
   world.showRulers();
 
@@ -19,42 +21,43 @@ export default (body: HTMLElement) => {
   const m = modes();
   const modeOptions: Record<string, Modes> = m.getOptions();
 
-  let docFragment: DocumentFragment = document.createDocumentFragment();
-  let smallestFrames: Array<HTMLDivElement> = [];
-  let shadowDocFragment: Node;
+  const createFrame = ({x, y} : Coordinates) => {
 
-  const totFrames: number = 10;
-
-  for (var i = totFrames; i--;) {
+    let docFragment: DocumentFragment = document.createDocumentFragment();
+    let smallestFrames: Array<HTMLDivElement> = [];
+    let shadowDocFragment: Node;
+  
+  
     const frame: HTMLDivElement = document.createElement("div");
-    const w = (Math.random() * 300 | 0);
-    const h = (Math.random() * 300 | 0);
+    const w = 360;
+    const h = 400;
+    
     frame.style.position = "absolute";
-    frame.style.top = (Math.random() * 1500 - Math.round(totFrames * 1) | 0) + 'px';
-    frame.style.left = (Math.random() * 1500 - Math.round(totFrames * 1) | 0) + 'px';
+    frame.style.left = `${x}px`;
+    frame.style.top = `${y}px`;
     frame.style.width = `${w}px`;
     frame.style.height = `${h}px`;
     frame.classList.add('frame');
     frame.setAttribute('draggable', '');
     frame.innerHTML = `
-	<label class="title" draggable text> Frame ${i}</label>
-	<main class="clip-content">
-		<p text>
-			<span class="margin-r-xs">🎃</span>pumpkin
-		</p>
-	</main>
-	`;
-
-    if (w < 200 || h < 200) {
-      frame.setAttribute('small', '')
-      smallestFrames.push(frame)
-    }
-
-    docFragment.appendChild(frame)
+  <label class="title" draggable text> Frame</label>
+  <main class="clip-content">
+    <p text>
+      🎃
+    </p>
+  </main>
+  `;
+  
+  if (w < 200 || h < 200) {
+    frame.setAttribute('small', '')
+    smallestFrames.push(frame)
   }
+
+  docFragment.appendChild(frame)
 
   shadowDocFragment = docFragment.cloneNode(true);
   world.wrapper.appendChild(docFragment);
+}
 
   // /// TRANSFORMATIONS 
 
@@ -127,6 +130,7 @@ export default (body: HTMLElement) => {
   let start = { x: 0, y: 0 };
 
   body!.onmousedown = (e: MouseEvent) => {
+
     e.preventDefault();
     const target = e.target as HTMLElement;
     console.log('mouse down', target)
@@ -393,7 +397,13 @@ export default (body: HTMLElement) => {
   	_requestAnimationFrame(render);
   }
 
-  document.addEventListener('blueprintdrop', (e) => console.log(e));
+  document.addEventListener('blueprintdrop', (e) => {
+    const {coord} = (e as CustomEvent).detail;
+
+    const {x, y} = world.getProjectedPoint({x: coord.x - originX, y: coord.y - originY});
+    createFrame({ x: -x, y: -y});
+
+  });
   render();
 };
 

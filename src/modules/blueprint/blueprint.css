@@ -276,7 +276,7 @@ div.frame:hover {
 	--delta-point-x: 0px;
 	--point-x: 0px;
 	--values-x: "";
-	width: 100vw;
+	width: calc(100vw - var(--origin-x));
 	height: var(--height);
 }
 .ruler.horizontal::before {
@@ -291,10 +291,10 @@ div.frame:hover {
 	--delta-point-y: 0px;
 	--point-y: 0px;
 	--values-y: "";
-	width: 100vh;
+	width: calc(100vh - var(--origin-y));
 	height: var(--height);
 	transform-origin: 0 0;
-	transform: rotate(-90deg) translate3d(-100vh, 0, 0);
+	transform: rotate(-90deg) translate3d(calc(-100vh + var(--origin-y)), 0, 0);
 }
 .ruler.vertical::before {
 	background: linear-gradient(-90deg, var(--color-on-surface) 1px, transparent 0) -0.5px/var(--increment);

@@ -2,12 +2,12 @@ declare global {
     interface Window {
         mozRequestAnimationFrame: any;
     }
+    interface Coordinates {
+        x: number,
+        y: number
+    }
 }
 
-interface Coordinates {
-    x: number,
-    y: number
-}
 
 import { _requestAnimationFrame } from '@/utilities/utilities';
 // import {WorldProperties} from './world';

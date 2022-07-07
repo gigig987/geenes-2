@@ -48,8 +48,8 @@ class World {
         // \/
         this.updateTransform = this.updateTransform.bind(this);
 
-        this.viewportW =  window.innerWidth
-        this.viewportH =  window.innerHeight
+        this.viewportW =  this.body.offsetWidth;
+        this.viewportH =  this.body!.offsetHeight;
     }
     
     getProperties(): WorldProperties {
@@ -77,11 +77,11 @@ class World {
         window.removeEventListener('resize', onResizeWindowRef)
     }
     private onResizeWindow() {
-        this.viewportW =  window.innerWidth
-        this.viewportH =  window.innerHeight
+        this.viewportW =  this.body.offsetWidth;
+        this.viewportH =  this.body!.offsetHeight;
         //TODO evaluate further optimisation to recaulculate only whe the threashold is reached
         // e.g this.viewportW < abs(values[0] - values[last])
-        this.calculateRuler()
+        this.calculateRuler();
     }
     private calculateRuler() {
         let {pointX, pointY, scale} = this.properties
