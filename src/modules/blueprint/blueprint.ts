@@ -3,8 +3,12 @@ type Directions = 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right'
 import World from './world';
 import { modes, Modes } from './modes';
 import { useInteractions } from './interactions';
-import { clamp, _requestAnimationFrame, now } from '@/utilities/utilities';
+import { clamp, _requestAnimationFrame, now, randomNamedColor } from '@/utilities/utilities';
 import { state }  from '@/utilities/state';
+import { uuidv4 } from '@/utilities/utilities';
+
+import Tree from '../tree';
+import * as fileType from '../../config/fileType.json';
 
 export default (body: HTMLElement) => {
   const {x: originX, y: originY} = body.getBoundingClientRect();
@@ -21,11 +25,38 @@ export default (body: HTMLElement) => {
   const m = modes();
   const modeOptions: Record<string, Modes> = m.getOptions();
 
-  const createFrame = ({x, y} : Coordinates) => {
+  const renderRoomTabs = (rooms: Array<string>, active?: string): void => {
+    
+    const tabs = document.getElementById('rooms-navigation');
+    for (let index = 0; index < rooms.length; index++) {
+      const template = ((
+        document
+        .querySelector(`#tab-template`) as HTMLTemplateElement)!
+        .content.cloneNode(true) as DocumentFragment)
+        .firstElementChild;
+  
+        const tabContent = template!.querySelector('.color-icon');
+        const tabName = template!.querySelector('.room-name');
+        const colorName = randomNamedColor(rooms[index])
+        tabName!.innerHTML = colorName;
+        tabContent!.style.backgroundColor = colorName;
+        template?.setAttribute('data-status', rooms[index] === active ? 'active' : '')
+        tabs?.appendChild(template!);
+      }
+  }
+
+  if (state.rooms.length) {
+  } else {
+    state.rooms.push(uuidv4());
+    state.activeRoom = state.rooms[0];
+  }
+  renderRoomTabs(state.rooms, state.activeRoom);
+
+  const createFrame = ({x, y} : Coordinates, {type, title}) => {
 
     let docFragment: DocumentFragment = document.createDocumentFragment();
     let smallestFrames: Array<HTMLDivElement> = [];
-    let shadowDocFragment: Node;
+    // let _shadowDocFragment: Node;
   
   
     const frame: HTMLDivElement = document.createElement("div");
@@ -40,13 +71,10 @@ export default (body: HTMLElement) => {
     frame.classList.add('frame');
     frame.setAttribute('draggable', '');
     frame.innerHTML = `
-  <label class="title" draggable text> Frame</label>
-  <main class="clip-content">
-    <p text>
-      🎃
-    </p>
-  </main>
-  `;
+      <label class="title" draggable text><span>${fileType[type]}</span>${title}</label>
+      <main class="clip-content">
+      </main>
+    `;
   
   if (w < 200 || h < 200) {
     frame.setAttribute('small', '')
@@ -55,7 +83,7 @@ export default (body: HTMLElement) => {
 
   docFragment.appendChild(frame)
 
-  shadowDocFragment = docFragment.cloneNode(true);
+  // _shadowDocFragment = docFragment.cloneNode(true);
   world.wrapper.appendChild(docFragment);
 }
 
@@ -157,7 +185,7 @@ export default (body: HTMLElement) => {
     }
   };
 
-  body.onmouseup = (e) => {
+  body.onmouseup = (_e) => {
     panning = false
     interactions.endResize()
     interactions.endMove()
@@ -169,7 +197,6 @@ export default (body: HTMLElement) => {
       return
     }
     e.preventDefault();
-    const projectedCoord = world.getProjectedPoint({ x: e.clientX, y: e.clientY })
     if (panning) {
       const x = (e.clientX - start.x)
       const y = (e.clientY - start.y)
@@ -373,7 +400,7 @@ export default (body: HTMLElement) => {
     world.wrapper.appendChild(mainDiv)
   }
 
-  const deselectElement = (el: HTMLElement) => {
+  const deselectElement = (_el: HTMLElement) => {
     console.log('PDDD')
     interactions.clean()
     // prevClickedElement
@@ -398,10 +425,16 @@ export default (body: HTMLElement) => {
   }
 
   document.addEventListener('blueprintdrop', (e) => {
-    const {coord} = (e as CustomEvent).detail;
+    const {coord, content} = (e as CustomEvent).detail;
+    const tree = new Tree(new class {
+      onInit(key: number){
+        console.log('tree ready')
+      }
+    });
 
+    const { value } = tree.find(content);
     const {x, y} = world.getProjectedPoint({x: coord.x - originX, y: coord.y - originY});
-    createFrame({ x: -x, y: -y});
+    createFrame({ x: -x, y: -y}, value);
 
   });
   render();

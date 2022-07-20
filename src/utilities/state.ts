@@ -9,7 +9,9 @@ interface State { [key: string | symbol]: any }
 window.subscribers = [];
 
 const defaultState: State = {
-  fps: 0
+  fps: 0,
+  rooms: [],
+  activeRoom: null,
 };
 
 export const state = new Proxy(defaultState, {

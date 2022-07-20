@@ -11,11 +11,11 @@ export interface Data {
 export type key = string | number;
 
 export interface TreeModelObserver {
-  onAdd(parentNodeKey:  key, key: key, value: Data): void;
+  onAdd?(parentNodeKey:  key, key: key, value: Data): void;
   onInit(key: key): void;
-  onMove(parentNodeKey: key, key: key): void;
-  onUpdate(key: key, value: Data): void;
-  onRemove(key: key): void;
+  onMove?(parentNodeKey: key, key: key): void;
+  onUpdate?(key: key, value: Data): void;
+  onRemove?(key: key): void;
 }
 
 interface ModelOptions {
@@ -109,7 +109,8 @@ export default class Tree {
       if (node.key === parentNodeKey) {
         node.children.push(new TreeNode(key, value, node));
         this.#save();
-        this.#client!.onAdd(parentNodeKey, key, value);
+        if (this.#client!.onAdd)
+          this.#client!.onAdd(parentNodeKey, key, value);
         return true;
       }
     }
@@ -122,7 +123,8 @@ export default class Tree {
       if (filtered.length !== node.children.length) {
         node.children = filtered;
         this.#save();
-        this.#client!.onRemove(key);
+        if(this.#client!.onRemove)
+          this.#client!.onRemove(key);
         return true;
       }
     }
@@ -144,7 +146,8 @@ export default class Tree {
     node.parent = parent;
     parent.children.push(node);
     this.#save();
-    this.#client?.onMove(parent.key, node.key);
+    if(this.#client!.onMove)
+      this.#client?.onMove(parent.key, node.key);
     return true;
   }
 
@@ -154,7 +157,8 @@ export default class Tree {
 
     node.value = {...node.value , ...update};
     this.#save();
-    this.#client?.onUpdate(key, node.value);
+    if(this.#client!.onUpdate)
+      this.#client?.onUpdate(key, node.value);
     return true;
   }
 }

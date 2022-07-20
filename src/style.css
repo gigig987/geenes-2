@@ -1,5 +1,8 @@
 @import './tokens/index.css';
 
+/* * {
+  outline: 1px solid green;
+} */
 html {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -7,6 +10,7 @@ html {
   background-color: var(--color-surface);
   color: var(--color-on-surface);
   font-size: 14px;
+  overflow: hidden;
 }
 
 html, body {
@@ -190,7 +194,7 @@ form[name="navigation"] input:focus + * {
   outline: 1px dotted #212121;
   outline: 5px auto -webkit-focus-ring-color;
 }
-main nav {
+main [name="navigation"] nav {
   width: var(--size-nav, 48px);
   border-right: var(--size-stroke) solid var(--color-stroke);
   padding: var(--space-inner);
@@ -220,7 +224,32 @@ details > summary aside {
   display: inline-flex;
 }
 
+.rooms-container {
+  flex: 1;
+}
+
+.rooms-component {
+  --icon-color: var(--color-on-surface);
+  display: flex;
+}
 article#blueprint {
   position: relative;
   overflow: hidden;
+  isolation: isolate;
+  height: 100%;
+}
+
+.tabs .tab {
+  display: inline-flex;
+  align-items: baseline;
+  margin: var(--space-inner);
+  border-right: var(--size-stroke) solid var(--color-stroke)
+}
+
+.tab .color-icon {
+  display: inline-block;
+  width: var(--size-icons);
+  height: var(--size-icons);
+  border: var(--size-stroke) solid var(--color-stroke);
+  align-self: center;
 }

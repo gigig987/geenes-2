@@ -30,7 +30,6 @@ class World {
     private viewportW :number
     private viewportH :number
     private areRulersActive: boolean =  false
-    private rulerWValues : Array<number> = []
     private rulerIncrement : number = 100
 
     constructor(body? : HTMLElement, properties? : WorldProperties) {

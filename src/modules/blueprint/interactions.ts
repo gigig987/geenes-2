@@ -34,7 +34,7 @@ let prevMousePosition: Coordinates = {
 let resizerHolder: HTMLElement | null
 let resizeBadge: HTMLSpanElement | null
 let resizingDirection: DOMTokenList
-let resizingMethod: Function = (coord: Coordinates) => { }
+let resizingMethod: Function = (_coord: Coordinates) => { }
 let running: boolean = false
 let rotateCenter: Coordinates
 let angle: number = 0

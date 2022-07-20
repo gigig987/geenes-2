@@ -20,6 +20,7 @@ interface DropEvent {
     x: number;
     y: number;
   }
+  content: [string];
 }
 export type draggableItem = HTMLFormElement;
 export interface draggableElements {
@@ -417,7 +418,6 @@ export default () => {
   //keydown event to implement selection and abort
 
   let lastIndex = -1;
-  const filesVisible = [];
   
   _.addEventListener('keydown', function (e) {
     //if the element is a grabbable item 
@@ -633,7 +633,10 @@ export default () => {
     console.log('end', related)
     _.classList.remove('dragging');
     if (related?.classList.contains('target-blueprint')) {
-      const data: DropEvent = {coord: { x: e.clientX, y: e.clientY }}
+      const data: DropEvent = {
+        coord: { x: e.clientX, y: e.clientY },
+        content: selections.items.map(item => item.name.split('_')[1])
+      }
       const event = new CustomEvent('blueprintdrop', {detail: data});
       document.dispatchEvent(event);
     }

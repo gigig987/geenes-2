@@ -112,9 +112,23 @@
           <aside resizable>
           </aside>
         </form>
-
-        <article id="blueprint" tabindex="0">
-        </article>
+        <div class="rooms-container">
+          <template id="tab-template">
+            <div class="tab | flow-h" data-status="">
+              <span class="color-icon"></span>
+              <span class="room-name">
+                Room
+              </span>
+              <button class="button-link" name="close" aria-label="close">✕</button>
+            </div>
+          </template>
+          <div class="rooms-component">
+            <nav id="rooms-navigation" aria-label="rooms navigation" class="tabs"></nav>
+            <button class="color-emoji" name="add" aria-label="add room">➕</button>
+          </div>
+          <article id="blueprint" tabindex="0">
+          </article>
+        </div>
       </main>
       <footer>
         <span class="fps-counter"></span>
