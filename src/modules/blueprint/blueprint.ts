@@ -3,9 +3,8 @@ type Directions = 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right'
 import World from './world';
 import { modes, Modes } from './modes';
 import { useInteractions } from './interactions';
-import { clamp, _requestAnimationFrame, now, randomNamedColor } from '@/utilities/utilities';
+import { clamp, _requestAnimationFrame, now, randomNamedColor, uuidv4 } from '@/utilities/utilities';
 import { state }  from '@/utilities/state';
-import { uuidv4 } from '@/utilities/utilities';
 
 import Tree from '../tree';
 import * as fileType from '../../config/fileType.json';
@@ -25,32 +24,55 @@ export default (body: HTMLElement) => {
   const m = modes();
   const modeOptions: Record<string, Modes> = m.getOptions();
 
-  const renderRoomTabs = (rooms: Array<string>, active?: string): void => {
-    
+  const forms = document.forms as Forms;
+  const form = forms['rooms-navigation'];
+  form.elements['add-room'].onclick = () => rooms.insert(rootKey, uuidv4());
+
+  const renderRoomTab = (room: string, active?: string): void => {
     const tabs = document.getElementById('rooms-navigation');
-    for (let index = 0; index < rooms.length; index++) {
-      const template = ((
-        document
-        .querySelector(`#tab-template`) as HTMLTemplateElement)!
-        .content.cloneNode(true) as DocumentFragment)
-        .firstElementChild;
-  
-        const tabContent = template!.querySelector('.color-icon');
-        const tabName = template!.querySelector('.room-name');
-        const colorName = randomNamedColor(rooms[index])
-        tabName!.innerHTML = colorName;
-        tabContent!.style.backgroundColor = colorName;
-        template?.setAttribute('data-status', rooms[index] === active ? 'active' : '')
-        tabs?.appendChild(template!);
-      }
+    const template = ((
+      document
+      .querySelector(`#tab-template`) as HTMLTemplateElement)!
+      .content.cloneNode(true) as DocumentFragment)
+      .firstElementChild;
+
+    const tabContent = template!.querySelector('.color-icon');
+    const tabName = template!.querySelector('.room-name');
+    const input = template!.querySelector('input');
+    const close = template!.querySelector('button[name="close"]');
+
+    const colorName = randomNamedColor(room);
+    tabName!.innerHTML = colorName;
+    tabContent!.style.backgroundColor = colorName;
+    template?.setAttribute('data-status', room === active ? 'active' : '');
+    input!.value = room;
+    input!.onchange = form!.onsubmit = () => changeRoom(Object.fromEntries(new FormData(form) as any)['active-room']);
+    close!.onclick = () => rooms.remove(room);
+    tabs?.appendChild(template!);
+  }
+  const changeRoom = (room: string): void => {
+    const input = form.querySelector(`input[value="${room}"]`);
+    form.querySelectorAll(`input`).forEach((item: HTMLInputElement) => item!.parentElement!.setAttribute('data-status', ''));
+    input!.parentElement.setAttribute('data-status', 'active');
+    input!.checked = true;
+
+    console.log(form.querySelector(`input[value="${room}"]`));
+    state.activeRoom = room;
   }
 
-  if (state.rooms.length) {
-  } else {
-    state.rooms.push(uuidv4());
-    state.activeRoom = state.rooms[0];
-  }
-  renderRoomTabs(state.rooms, state.activeRoom);
+  let rootKey = '';
+  const rooms = new Tree(new class {
+    onInit(key: string) {
+      rootKey = key;
+    }
+    onAdd(_parent: string, key: string, _value: any) {
+      renderRoomTab(key);
+      changeRoom(key);
+    }
+    onRemove(key: string) {
+      form.querySelector(`input[value="${key}"]`).parentElement.remove();
+    }
+  }, {storageKey: 'rooms'});
 
   const createFrame = ({x, y} : Coordinates, {type, title}) => {
 

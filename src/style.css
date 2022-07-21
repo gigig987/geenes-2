@@ -253,3 +253,7 @@ article#blueprint {
   border: var(--size-stroke) solid var(--color-stroke);
   align-self: center;
 }
+
+html {
+  accent-color: var(--color-primary);
+}

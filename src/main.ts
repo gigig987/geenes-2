@@ -7,6 +7,7 @@ import blueprint from './modules/blueprint/blueprint';
 import './modules/blueprint/blueprint.css';
 
 import { state }  from '@/utilities/state';
+import { randomNamedColor } from '@/utilities/utilities';
 
 interface Forms { [key: string]: any }
 
@@ -129,11 +130,16 @@ const modeCtrl = new ModeModel(new class {
 
 // Footer
 const fpsCounter = document.querySelector('footer .fps-counter');
+const activeRoomName = document.querySelector('footer .active-room');
 
 const renderFpsCounter = () => {
   fpsCounter!.innerHTML = `${state.fps} FPS`;
+};
+const renderActiveRoomName = () => {
+  activeRoomName!.innerHTML = `${randomNamedColor(state.activeRoom)}`;
 };
 
 
 // Subscribe the render function to state changes
 window.subscribers.push(renderFpsCounter);
+window.subscribers.push(renderActiveRoomName);

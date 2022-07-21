@@ -8,9 +8,9 @@ declare global {
   interface Window {
     opera: any;
   }
+  interface Forms { [key: string]: any }
 }
 
-interface Forms { [key: string]: any }
 
 interface DraggableFormsElements extends HTMLFormControlsCollection {
   title: HTMLInputElement;

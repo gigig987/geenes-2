@@ -1,16 +1,13 @@
 import { uuidv4 } from '@/utilities/utilities'
 
-type Node = TreeNode;
-type ParentNode = Node | null;
-export type DataType = 'FILE_COLOR' | 'FILE_MEASURE' | 'FOLDER'
-export interface Data {
-  title: string;
-  
-  type: DataType
+export interface Room {
+  id: string
+  content: Array<any>
 }
+
 export type key = string | number;
 
-export interface TreeModelObserver {
+export interface RoomModelObserver {
   onAdd?(parentNodeKey:  key, key: key, value: Data): void;
   onInit(key: key): void;
   onMove?(parentNodeKey: key, key: key): void;
@@ -23,53 +20,28 @@ interface ModelOptions {
   rootKey?: key
 }
 
-class TreeNode {
-  key: key;
-  value: any;
-  parent: TreeNode | null;
-  children: Array<TreeNode>;
-
-  constructor(key: key, value = key, parent: ParentNode = null) {
-    this.key = key;
-    this.value = value;
-    this.parent = parent;
-    this.children = [];
-  }
-
-  get isLeaf() {
-    return this.children.length === 0;
-  }
-
-  get hasChildren() {
-    return !this.isLeaf;
-  }
-}
-
-export default class Tree {
-  root: TreeNode;
-  #client: TreeModelObserver | null = null;
+export default class Rooms {
+  rooms: Array<Room>;
+  #client: RoomModelObserver | null = null;
   #storageKey = '';
 
-  constructor(client: TreeModelObserver, options?: ModelOptions) {
-    this.#storageKey = options?.storageKey || 'project-structure';
+  constructor(client: RoomModelObserver, options?: ModelOptions) {
+    this.#storageKey = options?.storageKey || 'rooms';
     this.#client = client;
     const asJson = localStorage.getItem(this.#storageKey);
-    let rootKey = options?.rootKey || uuidv4();
-    this.root = new TreeNode(rootKey);
+    this.rooms = [];
     if (asJson) {
       JSON.parse(asJson).structure
       .forEach(({ parent, key, value } : { parent:key, key:key, value: Data}) => {
         if (!parent) {
           rootKey = key;
           this.root = new TreeNode(rootKey);
-          this.#save();
           this.#client!.onInit(rootKey);
         } else {
           this.insert(parent, key, value)
         }
       });
     } else {
-      this.#save();
       this.#client!.onInit(rootKey);
     }
   }
