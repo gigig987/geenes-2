@@ -14,7 +14,7 @@ export interface TreeModelObserver {
   onAdd?(parentNodeKey:  key, key: key, value: Data): void;
   onInit(key: key): void;
   onMove?(parentNodeKey: key, key: key): void;
-  onUpdate?(key: key, value: Data): void;
+  onUpdate?(key: key, value: any): void;
   onRemove?(key: key): void;
 }
 
@@ -105,7 +105,7 @@ export default class Tree {
     localStorage.setItem(this.#storageKey, JSON.stringify({structure: array}));
   }
 
-  insert(parentNodeKey : key , key : key, value: any = key) {
+  insert(parentNodeKey : key , key : key, value: any = {key}) {
     console.log(parentNodeKey, key);
     for (let node of this.preOrderTraversal()) {
       if (node.key === parentNodeKey) {
@@ -153,7 +153,7 @@ export default class Tree {
     return true;
   }
 
-  update(key:key, update : Partial<Data>) {
+  update(key:key, update : any) {
     const node = this.find(key);
     if (!node) { return false; }
 

@@ -4,13 +4,13 @@ import World from './world';
 import { modes, Modes } from './modes';
 import { useInteractions } from './interactions';
 import { clamp, _requestAnimationFrame, now, randomNamedColor, uuidv4 } from '@/utilities/utilities';
-import { state }  from '@/utilities/state';
+import { state } from '@/utilities/state';
 
 import Tree from '../tree';
 import * as fileType from '../../config/fileType.json';
 
 export default (body: HTMLElement) => {
-  const {x: originX, y: originY} = body.getBoundingClientRect();
+  const { x: originX, y: originY } = body.getBoundingClientRect();
   body.style.setProperty('--origin-x', `${originX}px`);
   body.style.setProperty('--origin-y', `${originY}px`);
   const world = new World(body);
@@ -26,20 +26,20 @@ export default (body: HTMLElement) => {
 
   const forms = document.forms as Forms;
   const form = forms['rooms-navigation'];
-  form.elements['add-room'].onclick = () => rooms.insert(rootKey, uuidv4());
+  form.elements['add-room'].onclick = () => rooms.insert(rootKey, uuidv4(), { type: 'room', world: world.getProperties() });
 
   const renderRoomTab = (room: string, active?: string): void => {
     const tabs = document.getElementById('rooms-navigation');
     const template = ((
       document
-      .querySelector(`#tab-template`) as HTMLTemplateElement)!
+        .querySelector(`#tab-template`) as HTMLTemplateElement)!
       .content.cloneNode(true) as DocumentFragment)
       .firstElementChild;
 
-    const tabContent = template!.querySelector('.color-icon');
+    const tabContent = template!.querySelector('.color-icon') as HTMLElement;
     const tabName = template!.querySelector('.room-name');
     const input = template!.querySelector('input');
-    const close = template!.querySelector('button[name="close"]');
+    const close = template!.querySelector('button[name="close"]') as HTMLButtonElement;
 
     const colorName = randomNamedColor(room);
     tabName!.innerHTML = colorName;
@@ -50,46 +50,47 @@ export default (body: HTMLElement) => {
     close!.onclick = () => rooms.remove(room);
     tabs?.appendChild(template!);
   }
+  const loadRoom = (room: string) => {
+    const { children, value } = rooms.find(room);
+    world.moveAndZoom({x: value.world.pointX, y: value.world.pointY}, value.world.scale);
+    children.forEach(child => {
+      const { value, key } = child;
+      const { x,y,title,type } = value;
+      createFrame({ x, y }, { type, title, key });
+    });
+  }
   const changeRoom = (room: string): void => {
+    // update the state
+    state.activeRoom = room;
+    // select the tab with the room id
     const input = form.querySelector(`input[value="${room}"]`);
+    //remove the active status from every tab
     form.querySelectorAll(`input`).forEach((item: HTMLInputElement) => item!.parentElement!.setAttribute('data-status', ''));
+    // add the active status to the newly selected tab
     input!.parentElement.setAttribute('data-status', 'active');
     input!.checked = true;
 
-    console.log(form.querySelector(`input[value="${room}"]`));
-    state.activeRoom = room;
+    // remove all the visualised frames of the current room
+    body.querySelectorAll('.frame').forEach(frame => frame.remove());
+    interactions.clean();
+    loadRoom(room);
+
   }
-
-  let rootKey = '';
-  const rooms = new Tree(new class {
-    onInit(key: string) {
-      rootKey = key;
-    }
-    onAdd(_parent: string, key: string, _value: any) {
-      renderRoomTab(key);
-      changeRoom(key);
-    }
-    onRemove(key: string) {
-      form.querySelector(`input[value="${key}"]`).parentElement.remove();
-    }
-  }, {storageKey: 'rooms'});
-
-  const createFrame = ({x, y} : Coordinates, {type, title}) => {
+  const createFrame = ({ x, y }: Coordinates, { type, title, key }) => {
 
     let docFragment: DocumentFragment = document.createDocumentFragment();
     let smallestFrames: Array<HTMLDivElement> = [];
-    // let _shadowDocFragment: Node;
-  
-  
+
     const frame: HTMLDivElement = document.createElement("div");
     const w = 360;
     const h = 400;
-    
+
     frame.style.position = "absolute";
     frame.style.left = `${x}px`;
     frame.style.top = `${y}px`;
     frame.style.width = `${w}px`;
     frame.style.height = `${h}px`;
+    frame.setAttribute('data-key', key);
     frame.classList.add('frame');
     frame.setAttribute('draggable', '');
     frame.innerHTML = `
@@ -97,17 +98,56 @@ export default (body: HTMLElement) => {
       <main class="clip-content">
       </main>
     `;
-  
-  if (w < 200 || h < 200) {
-    frame.setAttribute('small', '')
-    smallestFrames.push(frame)
+
+    if (w < 200 || h < 200) {
+      frame.setAttribute('small', '')
+      smallestFrames.push(frame)
+    }
+
+    docFragment.appendChild(frame)
+
+    world.wrapper.appendChild(docFragment);
   }
 
-  docFragment.appendChild(frame)
+  const checkTabsNumber = () => {
+    const tabs =  form.querySelectorAll(`input`);
+    tabs.forEach((tab : HTMLInputElement) => {
+      const close = tab.parentElement!.querySelector('button[name="close"]') as HTMLButtonElement;
+      close.disabled = false;
+    });
+    if (tabs.length === 1) {
+      const close = tabs[0].parentElement!.querySelector('button[name="close"]') as HTMLButtonElement;
+      close.disabled = true;
+    }
+  }
 
-  // _shadowDocFragment = docFragment.cloneNode(true);
-  world.wrapper.appendChild(docFragment);
-}
+  let rootKey = '';
+  const rooms = new Tree(new class {
+    onInit(key: string) {
+      rootKey = key;
+    }
+    onAdd(_parent: string, key: string, value: any) {
+      const { type, x, y, title } = value;
+      if (type === 'room') {
+        renderRoomTab(key);
+        // changeRoom(key);
+      } else {
+        createFrame({ x, y }, { type, title, key });
+      }
+      checkTabsNumber();
+    }
+    onRemove(key: string) {
+      const tab = form.querySelector(`input[value="${key}"]`);
+      const frame =  body.querySelector(`[data-key="${key}"]`);
+      if (tab) {
+        tab.parentElement.remove();
+      } else if(frame) {
+        frame.remove();
+      }
+      checkTabsNumber();
+    }
+  }, { storageKey: 'rooms' });
+
 
   // /// TRANSFORMATIONS 
 
@@ -155,24 +195,30 @@ export default (body: HTMLElement) => {
   // /// EVENTS LISTENERS
 
 
-  body.onkeydown = (e) => {
+  document.body.onkeydown = (e) => {
     if (m.getCurrent() === modeOptions.TEXT_EDIT) return
-    e.preventDefault()
-    const key: string | number = e.code || e.keyCode
+    // e.preventDefault();
+    const key: string | number = e.code || e.keyCode || e.key
     if (key == 32 || key == 'Space') {
       //spacebar
       m.setCurrent(modeOptions.PAN)
       body.classList.add('pan-mode')
     }
   };
-  body.onkeyup = (e) => {
+  document.body.onkeyup = (e) => {
     if (m.getCurrent() === modeOptions.TEXT_EDIT) return
-    e.preventDefault()
+    // e.preventDefault();
     const key: string | number = e.code || e.keyCode
     if (key == 32 || key == 'Space') {
       //spacebar
-      m.resetPrevious()
-      body.classList.remove('pan-mode')
+      m.resetPrevious();
+      body.classList.remove('pan-mode');
+    } else if (key == 8 || key == 46 || key == 'Delete' || key == 'Backspace') {
+      const k = interactions.getTarget()!.getAttribute('data-key');
+      if (k) {
+        deselectElement(interactions.getTarget());
+        rooms.remove(k);
+      }
     }
   };
 
@@ -184,7 +230,7 @@ export default (body: HTMLElement) => {
     e.preventDefault();
     const target = e.target as HTMLElement;
     console.log('mouse down', target)
-    
+
     const { pointX, pointY, scale } = world.getProperties();
     if (m.getCurrent() === modeOptions.PAN) {
       panning = true;
@@ -241,6 +287,7 @@ export default (body: HTMLElement) => {
         { x: e.clientX, y: e.clientY }
       )
     }
+    rooms.update(state.activeRoom, { world: world.getProperties() });
   };
 
   // window.onmousedown = (e : MouseEvent) => {
@@ -434,30 +481,31 @@ export default (body: HTMLElement) => {
   let previousTime = now();
   let frameCount = 0
   function render() {
-  	var nextTime = now();
-  	var deltaTime = (nextTime - previousTime) / 1000;
-  	frameCount++;
-  	if (deltaTime > 1) {
+    var nextTime = now();
+    var deltaTime = (nextTime - previousTime) / 1000;
+    frameCount++;
+    if (deltaTime > 1) {
       state.fps = parseFloat((frameCount / deltaTime).toFixed(1));
-  		previousTime = nextTime;
-  		frameCount = 0;
-  	}
+      previousTime = nextTime;
+      frameCount = 0;
+    }
 
-  	_requestAnimationFrame(render);
+    _requestAnimationFrame(render);
   }
 
   document.addEventListener('blueprintdrop', (e) => {
-    const {coord, content} = (e as CustomEvent).detail;
+    const { coord, content: keys } = (e as CustomEvent).detail;
     const tree = new Tree(new class {
-      onInit(key: number){
+      onInit(key: number) {
         console.log('tree ready')
       }
     });
 
-    const { value } = tree.find(content);
-    const {x, y} = world.getProjectedPoint({x: coord.x - originX, y: coord.y - originY});
-    createFrame({ x: -x, y: -y}, value);
-
+    const { x, y } = world.getProjectedPoint({ x: coord.x - originX, y: coord.y - originY });
+    keys.forEach((key: string) => {
+      const { value } = tree.find(key);
+      rooms.insert(state.activeRoom, uuidv4(), { originalKey: key, ...value, x: -x, y: -y });
+    });
   });
   render();
 };

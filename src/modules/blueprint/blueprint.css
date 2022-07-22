@@ -332,3 +332,7 @@ div.frame:hover {
 .margin-r-xs {
 	margin-right: var(--spacing-xs);
 }
+
+button[name="close"][disabled] {
+	display: none;
+}
