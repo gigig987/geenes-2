@@ -26,7 +26,9 @@ export default (body: HTMLElement) => {
 
   const forms = document.forms as Forms;
   const form = forms['rooms-navigation'];
-  form.elements['add-room'].onclick = () => rooms.insert(rootKey, uuidv4(), { type: 'room', world: world.getProperties() });
+  const addRoom = () => rooms.insert(rootKey, uuidv4(), { type: 'room', world: world.getProperties() });
+
+  form.elements['add-room'].onclick = addRoom;
 
   const renderRoomTab = (room: string, active?: string): void => {
     const tabs = document.getElementById('rooms-navigation');
@@ -55,8 +57,8 @@ export default (body: HTMLElement) => {
     world.moveAndZoom({x: value.world.pointX, y: value.world.pointY}, value.world.scale);
     children.forEach(child => {
       const { value, key } = child;
-      const { x,y,title,type } = value;
-      createFrame({ x, y }, { type, title, key });
+      const { x,y,title,type,width,height } = value;
+      createFrame({ x, y }, { width, height }, { type, title, key });
     });
   }
   const changeRoom = (room: string): void => {
@@ -74,22 +76,22 @@ export default (body: HTMLElement) => {
     body.querySelectorAll('.frame').forEach(frame => frame.remove());
     interactions.clean();
     loadRoom(room);
-
   }
-  const createFrame = ({ x, y }: Coordinates, { type, title, key }) => {
+  const createFrame = (
+    { x, y }: Coordinates,
+    { width, height }: { width: number, height: number}, 
+    { type, title, key }: { type:string, title: string, key:string}
+    ) => {
 
     let docFragment: DocumentFragment = document.createDocumentFragment();
     let smallestFrames: Array<HTMLDivElement> = [];
 
     const frame: HTMLDivElement = document.createElement("div");
-    const w = 360;
-    const h = 400;
-
     frame.style.position = "absolute";
     frame.style.left = `${x}px`;
     frame.style.top = `${y}px`;
-    frame.style.width = `${w}px`;
-    frame.style.height = `${h}px`;
+    frame.style.width = `${width || 200 }px`;
+    frame.style.height = `${height || 200}px`;
     frame.setAttribute('data-key', key);
     frame.classList.add('frame');
     frame.setAttribute('draggable', '');
@@ -99,7 +101,7 @@ export default (body: HTMLElement) => {
       </main>
     `;
 
-    if (w < 200 || h < 200) {
+    if (width < 200 || height < 200) {
       frame.setAttribute('small', '')
       smallestFrames.push(frame)
     }
@@ -122,17 +124,19 @@ export default (body: HTMLElement) => {
   }
 
   let rootKey = '';
+  let lastRoomkey = '';
   const rooms = new Tree(new class {
     onInit(key: string) {
       rootKey = key;
     }
     onAdd(_parent: string, key: string, value: any) {
-      const { type, x, y, title } = value;
+      const { type, x, y, width, height, title } = value;
+      console.log(value)
       if (type === 'room') {
         renderRoomTab(key);
-        // changeRoom(key);
+        lastRoomkey = key;
       } else {
-        createFrame({ x, y }, { type, title, key });
+        createFrame({ x, y }, {width, height}, { type, title, key });
       }
       checkTabsNumber();
     }
@@ -140,7 +144,9 @@ export default (body: HTMLElement) => {
       const tab = form.querySelector(`input[value="${key}"]`);
       const frame =  body.querySelector(`[data-key="${key}"]`);
       if (tab) {
+        const otherTab = form.querySelector(`input:not([value="${key}"])`);
         tab.parentElement.remove();
+        changeRoom(otherTab.value);
       } else if(frame) {
         frame.remove();
       }
@@ -148,6 +154,7 @@ export default (body: HTMLElement) => {
     }
   }, { storageKey: 'rooms' });
 
+  changeRoom(lastRoomkey);
 
   // /// TRANSFORMATIONS 
 
@@ -258,6 +265,12 @@ export default (body: HTMLElement) => {
     interactions.endResize()
     interactions.endMove()
     interactions.endRotate()
+    const target = interactions.getTarget();
+    const targetKey = target!.getAttribute('data-key');
+    console.log(targetKey);
+    const { width, height, top, left } = target.style;
+    if (targetKey)
+      rooms.update(targetKey, {x: parseFloat(left), y: parseFloat(top), width: parseFloat(width), height: parseFloat(height)})
   };
 
   body.onmousemove = (e) => {
@@ -287,6 +300,7 @@ export default (body: HTMLElement) => {
         { x: e.clientX, y: e.clientY }
       )
     }
+
     rooms.update(state.activeRoom, { world: world.getProperties() });
   };
 

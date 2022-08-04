@@ -228,7 +228,7 @@ details > summary aside {
   flex: 1;
 }
 
-.rooms-component {
+.rooms-component form{
   --icon-color: var(--color-on-surface);
   display: flex;
 }
@@ -242,7 +242,8 @@ article#blueprint {
 .tabs .tab {
   display: inline-flex;
   align-items: baseline;
-  margin: var(--space-inner);
+  --spacing: var(--space-inner);
+  padding: var(--space-inner);
   border-right: var(--size-stroke) solid var(--color-stroke)
 }
 
