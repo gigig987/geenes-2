@@ -9,6 +9,9 @@ import './modules/blueprint/blueprint.css';
 import { state }  from '@/utilities/state';
 import { randomNamedColor } from '@/utilities/utilities';
 
+
+import * as Api from './api/api';
+
 interface Forms { [key: string]: any }
 
 const modules = new Map();
@@ -143,3 +146,16 @@ const renderActiveRoomName = () => {
 // Subscribe the render function to state changes
 window.subscribers.push(renderFpsCounter);
 window.subscribers.push(renderActiveRoomName);
+
+// Api.register({
+//   name: 'red',
+//   exec: `() => geenes.setColor('ciao', {name: '--clr-error', value:'red'});`
+// });
+// Api.register({
+//   name: 'red',
+//   exec: (geenes: any) => {geenes.setColor('ciao', {name: '--clr-error', value:'red'})
+
+// }
+// });
+
+Api
