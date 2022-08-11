@@ -57,8 +57,8 @@ export default (body: HTMLElement) => {
     world.moveAndZoom({x: value.world.pointX, y: value.world.pointY}, value.world.scale);
     children.forEach(child => {
       const { value, key } = child;
-      const { x,y,title,type,width,height } = value;
-      createFrame({ x, y }, { width, height }, { type, title, key });
+      const { x,y,title,type,width,height, originalKey } = value;
+      createFrame({ x, y }, { width, height }, { type, title, key, originalKey });
     });
   }
   const changeRoom = (room: string): void => {
@@ -80,7 +80,7 @@ export default (body: HTMLElement) => {
   const createFrame = (
     { x, y }: Coordinates,
     { width, height }: { width: number, height: number}, 
-    { type, title, key }: { type:string, title: string, key:string}
+    { type, title, key, originalKey }: { type:string, title: string, key:string, originalKey: string}
     ) => {
 
     let docFragment: DocumentFragment = document.createDocumentFragment();
@@ -108,7 +108,17 @@ export default (body: HTMLElement) => {
 
     docFragment.appendChild(frame)
 
+    const masterFrame = document.querySelector(`iframe[data-key="${originalKey}"]`) as HtmlFrameElement;
+    const template = ((
+      masterFrame?.contentDocument
+      .querySelector(`template`) as HTMLTemplateElement)!
+      .content.cloneNode(true))
+    console.log('originalKey', originalKey, template, frame.querySelector('main'))
+    frame.querySelector('main')!.appendChild(template!)
+
     world.wrapper.appendChild(docFragment);
+
+    return frame
   }
 
   const checkTabsNumber = () => {
@@ -130,13 +140,14 @@ export default (body: HTMLElement) => {
       rootKey = key;
     }
     onAdd(_parent: string, key: string, value: any) {
-      const { type, x, y, width, height, title } = value;
+      const { type, x, y, width, height, title, originalKey } = value;
       console.log(value)
       if (type === 'room') {
         renderRoomTab(key);
         lastRoomkey = key;
       } else {
-        createFrame({ x, y }, {width, height}, { type, title, key });
+        createFrame({ x, y }, {width, height}, { type, title, key, originalKey });
+
       }
       checkTabsNumber();
     }

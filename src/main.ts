@@ -10,7 +10,7 @@ import { state }  from '@/utilities/state';
 import { randomNamedColor } from '@/utilities/utilities';
 
 
-import * as Api from './api/api';
+import * as Api from './api/plugin';
 
 interface Forms { [key: string]: any }
 
