@@ -1,8 +1,9 @@
-import Tree from './tree';
-import { Data, key } from './tree';
-import * as fileType from '../config/fileType.json';
-import { uuidv4 } from '@/utilities/utilities';
+import Tree from './tree'
+import { Data, key } from './tree'
+import * as fileType from '../config/fileType.json'
+import { uuidv4 } from '@/utilities/utilities'
 import './files-handler.css'
+import { init } from '@/api/plugin'
 
 declare global {
   interface Window {
@@ -28,6 +29,8 @@ export interface draggableElements {
   owner: null | ParentNode
   droptarget: null | HTMLFormElement
 }
+
+export const loadFiles = () => {}
 export default () => {
   //exclude older browsers by the features we need them to support
   //and legacy opera explicitly so we don't waste time on a dead browser
@@ -54,6 +57,8 @@ export default () => {
     }
 
     onAdd(parentKey: key, key: key, { type, title } : Data) {
+      console.log('file added')
+    init(type, key as string)
     // depending on the type load the right template
     // FOLDER | FILE_...
     const template = ((

@@ -1,0 +1,52 @@
+{
+  "color": {
+    "rgb": {
+      "original": {
+        "_formula": "rgb255",
+        "_array": [0,0,0],
+        "_regex": "0,0,0",
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      "norm": {
+        "_formula": "rgbNorm",
+        "_array": [0,0,0],
+        "_regex": "0,0,0",
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      "css": {
+        "_formula": "rgbCss",       
+        "_regex": "rgb(0,0,0)"
+      }
+    },
+    "hsl": {
+      "original": {
+        "_formula": "hsl",
+        "_array": [0,0,0],
+        "_regex": "0,0,0",
+        "h": 0,
+        "s": 0,
+        "l": 0
+      },
+      "norm": {
+        "_formula": "hslNorm",
+        "_array": [0,0,0],
+        "_regex": "0,0,0",
+        "h": 0,
+        "s": 0,
+        "l": 0
+      },
+      "css": {
+        "_formula": "hslCss",       
+        "_regex": "/hsl(s*(d+)s*,s*(d+(?:.d+)?%)s*,s*(d+(?:.d+)?%))/g"
+      }
+    },
+    "hex": {
+      "_formula": "hex",
+      "_regex": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "id": "FILE_COLOR",
+  "name": "Color single",
+  "description": "a simple test installation for the first plugin in Geenes",
+  "author": "Gianluca Gini",
+  "code": "./code.js",
+  "ui": "./ui.html"
+}

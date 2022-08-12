@@ -109,6 +109,8 @@ export default (body: HTMLElement) => {
     docFragment.appendChild(frame)
 
     const masterFrame = document.querySelector(`iframe[data-key="${originalKey}"]`) as HtmlFrameElement;
+    console.log(masterFrame, originalKey)
+    if (!masterFrame) { return }
     const template = ((
       masterFrame?.contentDocument
       .querySelector(`template`) as HTMLTemplateElement)!
@@ -138,6 +140,7 @@ export default (body: HTMLElement) => {
   const rooms = new Tree(new class {
     onInit(key: string) {
       rootKey = key;
+      console.log('room init', key)
     }
     onAdd(_parent: string, key: string, value: any) {
       const { type, x, y, width, height, title, originalKey } = value;

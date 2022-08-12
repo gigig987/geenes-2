@@ -3,7 +3,10 @@ import internalApi from './core'
 import framework from './plugin.framework.js?raw'
 import * as fileType from '../config/fileType.json';
 
-type FileTypes = keyof typeof fileType;
+declare global {
+  type FileTypes = keyof typeof fileType;
+}
+
 
 interface Output {
   types: Array<FileTypes>
@@ -12,11 +15,11 @@ interface Output {
 interface Plugin {
   id: FileTypes
   name: string
-  description: string
-  author: string
+  description?: string
+  author?: string
   code: string
   ui: string
-  output: Output
+  output?: Output
 }
 
 type GeenesPluginEvent = CustomEvent & {};
@@ -30,9 +33,13 @@ export const register = (plugin: Plugin): void =>{
 }
 
 export const getPlugin = (id: string): Plugin | undefined => registry.get(id)
+export const getAllPlugins = () => registry.keys()
 
 export const init = (id: string, instanceID: string): void => {
-  const { code, ui } = getPlugin(id)!
+  console.log('plugin init')
+  const plugin = getPlugin(id)!
+  if (!plugin) return
+  const { code, ui } = plugin 
   if (!code || !ui) return
   // This distortion maps will allow to filter out certain features that pose a security issue
   const { value } = Object.getOwnPropertyDescriptor(window, 'postMessage') as {value: Function};
