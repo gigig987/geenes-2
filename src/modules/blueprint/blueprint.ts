@@ -6,7 +6,7 @@ import { useInteractions } from './interactions';
 import { clamp, _requestAnimationFrame, now, randomNamedColor, uuidv4 } from '@/utilities/utilities';
 import { state } from '@/utilities/state';
 
-import Tree from '../tree';
+import Tree from '@/models/tree';
 import * as fileType from '../../config/fileType.json';
 
 export default (body: HTMLElement) => {

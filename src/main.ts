@@ -1,15 +1,15 @@
-import './style.css'
+import '@/style/style.css'
 import '@/utilities/utility.css'
 import './reactivity.css'
 
-import ModeModel from './models/mode';
-import blueprint from './modules/blueprint/blueprint';
-import './modules/blueprint/blueprint.css';
+import ModeModel from '@/models/mode';
+import blueprint from '@/modules/blueprint/blueprint';
+import '@/modules/blueprint/blueprint.css';
 
 import { state }  from '@/utilities/state';
 import { randomNamedColor } from '@/utilities/utilities';
 
-import pluginLoader from './utilities/pluginLoader'
+import pluginLoader from '@/utilities/pluginLoader'
 
 interface Forms { [key: string]: any }
 

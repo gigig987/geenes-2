@@ -1,5 +1,5 @@
-import Tree from './tree'
-import { Data, key } from './tree'
+import Tree from '../models/tree'
+import { Data, key } from '../models/tree'
 import * as fileType from '../config/fileType.json'
 import { uuidv4 } from '@/utilities/utilities'
 import './files-handler.css'
@@ -30,7 +30,6 @@ export interface draggableElements {
   droptarget: null | HTMLFormElement
 }
 
-export const loadFiles = () => {}
 export default () => {
   //exclude older browsers by the features we need them to support
   //and legacy opera explicitly so we don't waste time on a dead browser
