@@ -1,4 +1,4 @@
-import { register, getAllPlugins } from '@/api/plugin'
+import { registerPlugin, getAllPlugins } from '@/api/plugin'
 const plugins = import.meta.glob('@/plugins/*/manifest.json', { assert: {type: 'eager'}})
 
 interface Manifest {
@@ -21,7 +21,7 @@ const load = async () => {
     const codePath = `${key.replace('manifest.json', '')}${c.replace('./', '')}?raw`
     const ui = await import(/* @vite-ignore */uiPath);
     const code = await import(/* @vite-ignore */codePath);
-    register({
+    registerPlugin({
       ...mod as Manifest,
       code: code.default,
       ui: ui.default,

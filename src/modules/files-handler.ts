@@ -1,9 +1,8 @@
-import Tree from '../models/tree'
 import { Data, key } from '../models/tree'
 import * as fileType from '../config/fileType.json'
+import { getFileCtrl } from '@/controllers/files'
 import { uuidv4 } from '@/utilities/utilities'
 import './files-handler.css'
-import { init } from '@/api/plugin'
 
 declare global {
   interface Window {
@@ -45,8 +44,8 @@ export default () => {
   const _ = document.getElementById('file-handler');
   if(!_) { return; }
   
-  // Tree data structure
-  const tree = new Tree(new class {
+  const fileCtrl = getFileCtrl()
+  const client = new class {
     onInit(key: number): void{
       // assign to the root element the root key
       const form = _.querySelector('ol')!.parentNode;
@@ -56,8 +55,6 @@ export default () => {
     }
 
     onAdd(parentKey: key, key: key, { type, title } : Data) {
-      console.log('file added')
-    init(type, key as string)
     // depending on the type load the right template
     // FOLDER | FILE_...
     const template = ((
@@ -73,14 +70,14 @@ export default () => {
     if (form instanceof HTMLFormElement) {
       form.name = `file_${key}`;
       const input = (form!.elements as DraggableFormsElements).title;
-      input.onchange = form!.onsubmit = () => tree.update(key,  Object.fromEntries(new FormData(form)));
+      input.onchange = form!.onsubmit = () => fileCtrl?.update(key,  Object.fromEntries(new FormData(form)));
       input.addEventListener('blur', ({ target }) => {
         if (target && target instanceof HTMLInputElement) {
           target.setAttribute('readonly', '');
           target.setAttribute('disabled', '');
           if (!target.value) {
             const key = target.form!.name.split('_')[1];
-            tree.remove(key);
+            fileCtrl?.remove(key);
           }
         }
       });
@@ -92,7 +89,7 @@ export default () => {
       });
       form.addEventListener('submit', ({submitter: {name}}: {submitter: any}) => {
         if (name === 'delete') {
-          tree.remove(key);
+          fileCtrl?.remove(key);
         } else if (name === 'rename') {
           // rename functionality with autofocus
           input.removeAttribute('readonly');
@@ -150,8 +147,8 @@ export default () => {
       if (input.previousElementSibling)
       input.previousElementSibling.textContent = `${fileType[type]}`;
     }
-  });
-
+  }
+  fileCtrl?.addClient(client)
   //dictionary for storing the selections data 
   //comprising an array of the currently selected items 
   //a reference to the selected items' owning container
@@ -377,7 +374,6 @@ export default () => {
         else {
           //add this additional selection
           addSelection(form!);
-          console.log('adding', form, selections)
         }
       }
   }
@@ -437,17 +433,13 @@ export default () => {
         }
 
         if (e.key === 'ArrowDown' ) {
-          console.log('moving down', lastIndex)
           lastIndex++;
         } else if (e.key === 'ArrowUp') {
-          console.log('moving up', lastIndex)
           lastIndex--;
         } else if (e.key === 'ArrowRight') {
-          console.log('opening', lastIndex)
           const d = e.target.children[lastIndex].querySelector('details');
           d?.setAttribute('open', '');
         } else if (e.key === 'ArrowLeft') {
-          console.log('closing', lastIndex)
           const d = e.target.children[lastIndex].querySelector('details');
           d?.removeAttribute('open');
         }
@@ -577,7 +569,6 @@ export default () => {
 
   //dragenter event to set that variable
   _.addEventListener('dragenter', function (e) {
-    console.log('entering', e.target)
     if (e.target instanceof HTMLElement) {
       related = e.target;
     }
@@ -634,7 +625,6 @@ export default () => {
   //dragend event to implement items being validly dropped into targets,
   //or invalidly dropped elsewhere, and to clean-up the interface either way
   _.addEventListener('dragend', function (e) {
-    console.log('end', related)
     _.classList.remove('dragging');
     if (related?.classList.contains('target-blueprint')) {
       const data: DropEvent = {
@@ -652,7 +642,7 @@ export default () => {
       for (var len = selections.items.length, i = 0; i < len; i++) {
         const key = selections.items[i]!.name.split('_')[1];
         const parentKey = selections.droptarget!.name.split('_')[1];
-        tree.move(parentKey, key);
+        fileCtrl?.move(parentKey, key);
       }
 
       //prevent default to allow the action            
@@ -733,7 +723,7 @@ export default () => {
         
         const type = Object.fromEntries(new FormData(form) as any)['file-type'];
         if (type) {
-          tree.insert(form!.elements['selected-cache'].value || tree.root.key, uuidv4(), {type: type, title: ''});
+          fileCtrl?.insert(form!.elements['selected-cache'].value || fileCtrl?.root.key, uuidv4(), {type: type, title: ''});
           forms['files-actions'].elements['show-file-type-menu'].checked = false;
           if (target instanceof HTMLInputElement) {
             target!.checked = false;
@@ -746,11 +736,10 @@ export default () => {
   });
 
   forms['files-actions'].addEventListener('submit', ({submitter: {name}}: {submitter: HTMLFormElement}) => {
-    let parentKey: number | string = tree.root.key; // root
+    let parentKey: number | string = fileCtrl?.root.key; // root
 
     if(selections.items.length) {
       const item = selections.items.reverse().find(item => item.getAttribute('data-drop'));
-      console.log(item)
       item?.querySelector('details')!.setAttribute('open', '');
       parentKey = item ? item.name.split('_')[1] : parentKey;
     }
@@ -758,7 +747,7 @@ export default () => {
       forms['files-actions'].elements['show-file-type-menu'].checked = true;
       forms['files-actions'].elements['selected-cache'].value = parentKey;
     } else if (name === 'new-folder') {
-      tree.insert(parentKey, self.crypto.randomUUID(), {type: 'FOLDER', title: ''});
+      fileCtrl?.insert(parentKey, self.crypto.randomUUID(), {type: 'FOLDER', title: ''});
     }
   });
 

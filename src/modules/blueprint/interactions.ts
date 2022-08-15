@@ -122,7 +122,6 @@ export const useInteractions = () => {
 
     const initMoving: Function = (e: MouseEvent): void => {
 
-        console.log('moving', e)
         const target = e.target as HTMLElement
         moving = true
         if (target.tagName === 'MAIN' || target.tagName === 'LABEL') {
@@ -465,7 +464,6 @@ const resizeHandler = (coord: Coordinates, left = false, top = false, xResize = 
         newX -= 0.5 * rotatedHDiff * sinFraction;
         newY += 0.5 * rotatedHDiff * cosFraction;
     }
-    console.log({ x: newX, y: newY, height: newH, width: newW })
     updateRectangle({ x: newX, y: newY, height: newH, width: newW })
 }
 

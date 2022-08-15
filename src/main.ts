@@ -10,6 +10,7 @@ import { state }  from '@/utilities/state';
 import { randomNamedColor } from '@/utilities/utilities';
 
 import pluginLoader from '@/utilities/pluginLoader'
+import { loadFiles } from '@/controllers/files'
 
 interface Forms { [key: string]: any }
 
@@ -57,10 +58,10 @@ const loadBlueprint = (): void => {
 
 const firstLoad = async (): Promise<void> => {
   const plugins = await pluginLoader()
-  console.log(plugins)
   setOverlay()
   resizeProjectNameField()
   handleNavigation()
+  loadFiles()
   // TODO Add a functionality to load files independently from files-handler (which is not yet loaded here)
   // The files, and so the plugins which are their master components must be loaded very early
   // and be available regardless of the main navigation tab selected.
@@ -120,7 +121,6 @@ const handleNavigation = () => {
   
   const modeCtrl = new ModeModel(new class {
     async onChange(value: string, _old: string) {
-      console.log(value)
       form!.elements.main.value = value;
   
       let template;
@@ -153,13 +153,3 @@ const renderActiveRoomName = () => {
 window.subscribers.push(renderFpsCounter);
 window.subscribers.push(renderActiveRoomName);
 
-// Api.register({
-//   name: 'red',
-//   exec: `() => geenes.setColor('ciao', {name: '--clr-error', value:'red'});`
-// });
-// Api.register({
-//   name: 'red',
-//   exec: (geenes: any) => {geenes.setColor('ciao', {name: '--clr-error', value:'red'})
-
-// }
-// });

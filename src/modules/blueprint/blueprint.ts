@@ -9,6 +9,8 @@ import { state } from '@/utilities/state';
 import Tree from '@/models/tree';
 import * as fileType from '../../config/fileType.json';
 
+import { getFileCtrl } from '@/controllers/files';
+
 export default (body: HTMLElement) => {
   const { x: originX, y: originY } = body.getBoundingClientRect();
   body.style.setProperty('--origin-x', `${originX}px`);
@@ -109,13 +111,11 @@ export default (body: HTMLElement) => {
     docFragment.appendChild(frame)
 
     const masterFrame = document.querySelector(`iframe[data-key="${originalKey}"]`) as HtmlFrameElement;
-    console.log(masterFrame, originalKey)
     if (!masterFrame) { return }
     const template = ((
       masterFrame?.contentDocument
       .querySelector(`template`) as HTMLTemplateElement)!
       .content.cloneNode(true))
-    console.log('originalKey', originalKey, template, frame.querySelector('main'))
     frame.querySelector('main')!.appendChild(template!)
 
     world.wrapper.appendChild(docFragment);
@@ -140,11 +140,9 @@ export default (body: HTMLElement) => {
   const rooms = new Tree(new class {
     onInit(key: string) {
       rootKey = key;
-      console.log('room init', key)
     }
     onAdd(_parent: string, key: string, value: any) {
       const { type, x, y, width, height, title, originalKey } = value;
-      console.log(value)
       if (type === 'room') {
         renderRoomTab(key);
         lastRoomkey = key;
@@ -170,6 +168,20 @@ export default (body: HTMLElement) => {
 
   changeRoom(lastRoomkey);
 
+  const fileCtrl = getFileCtrl();
+  const observeFiles = new class {
+    onInit(key: number): void{
+    }
+    onRemove(key: string): void{
+      for (let node of rooms.preOrderTraversal()) {
+        if (node.value!.originalKey === key) {
+          rooms.remove(node.key)
+        }
+      }
+      
+    }
+  }
+  fileCtrl?.addClient(observeFiles);
   // /// TRANSFORMATIONS 
 
   // let smallestAlreadyRemoved : boolean = false
@@ -250,7 +262,6 @@ export default (body: HTMLElement) => {
 
     e.preventDefault();
     const target = e.target as HTMLElement;
-    console.log('mouse down', target)
 
     const { pointX, pointY, scale } = world.getProperties();
     if (m.getCurrent() === modeOptions.PAN) {
@@ -281,7 +292,6 @@ export default (body: HTMLElement) => {
     interactions.endRotate()
     const target = interactions.getTarget();
     const targetKey = target!.getAttribute('data-key');
-    console.log(targetKey);
     const { width, height, top, left } = target.style;
     if (targetKey)
       rooms.update(targetKey, {x: parseFloat(left), y: parseFloat(top), width: parseFloat(width), height: parseFloat(height)})
@@ -445,7 +455,6 @@ export default (body: HTMLElement) => {
       el = el.parentElement ? el.parentElement : el
     }
     const { x, y, width, height } = el.getBoundingClientRect()
-    console.log(el, el.getBoundingClientRect())
     const { pointX, pointY, scale } = world.getProperties()
     const a = getComputedStyle(el).getPropertyValue('--angle')
     let n
@@ -498,12 +507,10 @@ export default (body: HTMLElement) => {
   }
 
   const deselectElement = (_el: HTMLElement) => {
-    console.log('PDDD')
     interactions.clean()
     // prevClickedElement
   }
 
-  body.addEventListener('resize', () => console.log('heey'));
 
   /// RENDERING (optional)
   let previousTime = now();
@@ -525,7 +532,6 @@ export default (body: HTMLElement) => {
     const { coord, content: keys } = (e as CustomEvent).detail;
     const tree = new Tree(new class {
       onInit(key: number) {
-        console.log('tree ready')
       }
     });
 

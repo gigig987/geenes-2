@@ -28,14 +28,16 @@ class PluginRegistry extends Map<string, Plugin> {}
 
 const registry = new PluginRegistry();
 
-export const register = (plugin: Plugin): void =>{
+export const registerPlugin = (plugin: Plugin): void =>{
   registry.set(plugin.id, plugin);
 }
 
 export const getPlugin = (id: string): Plugin | undefined => registry.get(id)
 export const getAllPlugins = () => registry.keys()
 
-export const init = (id: string, instanceID: string): void => {
+export const unregisterPlugin = (id: string): boolean => registry.delete(id)
+
+export const initPlugin = (id: string, instanceID: string): void => {
   console.log('plugin init')
   const plugin = getPlugin(id)!
   if (!plugin) return
@@ -67,7 +69,6 @@ export const init = (id: string, instanceID: string): void => {
   // Let's add the plugin html ui into the iframe
   iframe.contentDocument?.open()
   iframe.contentDocument?.write(`<template id="plugin-template">${ui}</template>`)
-  console.log(iframe.contentDocument)
   iframe.contentDocument?.close()
 
   const myWin = iframe.contentWindow as Window & typeof globalThis
@@ -97,6 +98,10 @@ export const init = (id: string, instanceID: string): void => {
   } catch (error) {
     console.error(error)
   }
+}
+// Removes the instance of the plugin. 
+export const removePlugin = (instanceID: string) => {
+  document.querySelector(`iframe[data-key="${instanceID}"]`)!.remove();
 }
 
 

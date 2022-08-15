@@ -47,15 +47,15 @@ class TreeNode {
 
 export default class Tree {
   root: TreeNode;
-  #client: TreeModelObserver | null = null;
+  #clients: Set<TreeModelObserver> = new Set();
   #storageKey = '';
 
   constructor(client: TreeModelObserver, options?: ModelOptions) {
     this.#storageKey = options?.storageKey || 'project-structure';
-    this.#client = client;
-    const asJson = localStorage.getItem(this.#storageKey);
     let rootKey = options?.rootKey || uuidv4();
-    this.root = new TreeNode(rootKey);
+    this.root = new TreeNode(rootKey)
+    this.#clients.add(client)
+    const asJson = localStorage.getItem(this.#storageKey);
     if (asJson) {
       JSON.parse(asJson).structure
       .forEach(({ parent, key, value } : { parent:key, key:key, value: Data}) => {
@@ -63,15 +63,16 @@ export default class Tree {
           rootKey = key;
           this.root = new TreeNode(rootKey);
           this.#save();
-          this.#client!.onInit(rootKey);
+          client.onInit(rootKey);
         } else {
           this.insert(parent, key, value)
         }
       });
     } else {
       this.#save();
-      this.#client!.onInit(rootKey);
+      client.onInit(rootKey);
     }
+    // this.addClient(client)
   }
 
   *preOrderTraversal(node = this.root): Generator<TreeNode> {
@@ -105,14 +106,50 @@ export default class Tree {
     localStorage.setItem(this.#storageKey, JSON.stringify({structure: array}));
   }
 
-  insert(parentNodeKey : key , key : key, value: any = {key}) {
-    console.log(parentNodeKey, key);
+  addClient(client: TreeModelObserver) {
+    this.#clients.add(client);
+    const asJson = localStorage.getItem(this.#storageKey);
+    let rootKey = this.root!.key
+    if (asJson) {
+      JSON.parse(asJson).structure
+      .forEach(({ parent, key, value } : { parent:key, key:key, value: Data}) => {
+        if (!parent) {
+          rootKey = key;
+          this.root = new TreeNode(rootKey);
+          this.#save();
+          client.onInit(rootKey);
+        } else {
+          this.insertLocal(client, parent, key, value)
+        }
+      });
+    } else {
+      this.#save();
+      client.onInit(rootKey);
+    }
+  }
+
+  insertLocal(client: TreeModelObserver, parentNodeKey : key , key : key, value: any = {key}) {
     for (let node of this.preOrderTraversal()) {
       if (node.key === parentNodeKey) {
         node.children.push(new TreeNode(key, value, node));
         this.#save();
-        if (this.#client!.onAdd)
-          this.#client!.onAdd(parentNodeKey, key, value);
+        if (client!.onAdd)
+          client!.onAdd(parentNodeKey, key, value);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  insert(parentNodeKey : key , key : key, value: any = {key}) {
+    for (let node of this.preOrderTraversal()) {
+      if (node.key === parentNodeKey) {
+        node.children.push(new TreeNode(key, value, node));
+        this.#save();
+        this.#clients.forEach(client => {
+          if (client.onAdd)
+            client.onAdd(parentNodeKey, key, value);
+        })
         return true;
       }
     }
@@ -125,8 +162,11 @@ export default class Tree {
       if (filtered.length !== node.children.length) {
         node.children = filtered;
         this.#save();
-        if(this.#client!.onRemove)
-          this.#client!.onRemove(key);
+        this.#clients.forEach(client => {
+          if(client.onRemove)
+            client.onRemove(key);
+        })
+
         return true;
       }
     }
@@ -148,8 +188,11 @@ export default class Tree {
     node.parent = parent;
     parent.children.push(node);
     this.#save();
-    if(this.#client!.onMove)
-      this.#client?.onMove(parent.key, node.key);
+    this.#clients.forEach(client => {
+      if(client.onMove)
+        client.onMove(parent.key, node.key);
+    })
+
     return true;
   }
 
@@ -159,8 +202,11 @@ export default class Tree {
 
     node.value = {...node.value , ...update};
     this.#save();
-    if(this.#client!.onUpdate)
-      this.#client?.onUpdate(key, node.value);
+    this.#clients.forEach(client => {
+      if(client.onUpdate)
+        client.onUpdate(key, node.value);
+    })
+
     return true;
   }
 }
