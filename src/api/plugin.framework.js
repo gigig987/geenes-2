@@ -5,7 +5,7 @@
 'use strict';
 class GeenesPluginEvent extends CustomEvent {};
 const dispatch = ({funcName, funcValue}) => {
-  const ev = new GeenesPluginEvent('pluginMessage', { detail: { funcName, funcValue } });
+  const ev = new GeenesPluginEvent('pluginMessage', { detail: { funcName, funcValue, instanceId } });
   document.dispatchEvent(ev);
 }
 
@@ -20,9 +20,17 @@ const removeToken = () => {
   dispatch({funcName});
 };
 
+const setColorToken = (name, val) => {
+  const funcName = 'setColorToken';
+  const funcValue = JSON.stringify({name, val});
+  dispatch({funcName, funcValue});
+};
+
 globalThis.geenes = () => {
   return {
     setToken,
-    removeToken
+    removeToken,
+    setColorToken
   }
 };
+

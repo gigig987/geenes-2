@@ -109,15 +109,11 @@ export default (body: HTMLElement) => {
     }
 
     docFragment.appendChild(frame)
-
-    const masterFrame = document.querySelector(`iframe[data-key="${originalKey}"]`) as HtmlFrameElement;
-    if (!masterFrame) { return }
-    const template = ((
-      masterFrame?.contentDocument
-      .querySelector(`template`) as HTMLTemplateElement)!
-      .content.cloneNode(true))
-    frame.querySelector('main')!.appendChild(template!)
-
+    const elm = document.createElement('single-color')
+    console.log('plugin code')
+      
+    frame.querySelector('main')!.appendChild(elm)
+      
     world.wrapper.appendChild(docFragment);
 
     return frame

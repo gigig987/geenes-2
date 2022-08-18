@@ -271,3 +271,62 @@ export const randomNamedColor = (seed: number | string): string => {
   const rndInt = (lo = 0, hi = colorArray.length) => Math.floor(rnd(lo, hi, 2));
   return colorArray[rndInt()];
 }
+
+export const findColorName = (hex: string) => {
+  // TODO, implement the real thing
+  return 'white'
+}
+
+export const hexToRgb = (hex: string): colorTuple | null => {
+  // If 3 digit hexcode then double each digit 6 digit
+  const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  hex = hex.replace(shorthandRegex, function(_m, r, g, b) {
+    return r + r + g + g + b + b;
+  });
+  // Use built-in base16 parser to convert to rgb
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  // Cant use map since first element of result is the whole matched string
+  // Do not need to add 0 since parseInt converts -0 to 0
+  return result ?
+    [parseInt(result[1], 16), parseInt(result[2], 16),
+      parseInt(result[3], 16)] :
+    null;
+}
+
+export const rgbToHsl = (rgb: colorTuple): colorTuple => {
+  // Normalize rgb tuple to [0,1]
+  const r1 = rgb[0] / 255;
+  const g1 = rgb[1] / 255;
+  const b1 = rgb[2] / 255;
+  // Lightness is average of max and min normalized rgb values
+  const maxColor = Math.max(r1, g1, b1);
+  const minColor = Math.min(r1, g1, b1);
+  let L = (maxColor + minColor) / 2;
+  // Hue and saturation are only non zero if color is grey
+  // A color is grey if all r,g,b are all the same (maxColor===minColor)
+  let S = 0;
+  let H = 0;
+  if (maxColor !== minColor) {
+    if (L < 0.5) {
+      S = (maxColor - minColor) / (maxColor + minColor);
+    } else {
+      S = (maxColor - minColor) / (2.0 - maxColor - minColor);
+    }
+    if (r1 === maxColor) {
+      H = (g1 - b1) / (maxColor - minColor);
+    } else if (g1 === maxColor) {
+      H = 2.0 + (b1 - r1) / (maxColor - minColor);
+    } else {
+      H = 4.0 + (r1 - g1) / (maxColor - minColor);
+    }
+  }
+  // Scale up to [0,100] for Lightnexx and saturation, [0,360) for Hue
+  L = L * 100;
+  S = S * 100;
+  H = H * 60;
+  // Hue has a period of 360deg, if hue is negative, get positive hue
+  // by scaling h to (-360,0) and adding 360
+  H = (H < 0) ? H % 360 + 360 : H;
+  // Add zero to prevent signed zeros (force 0 rather than -0)
+  return [H + 0, S + 0, L + 0];
+}

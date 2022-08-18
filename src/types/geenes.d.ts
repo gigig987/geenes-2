@@ -1,0 +1,1 @@
+type colorTuple = [number, number, number]
