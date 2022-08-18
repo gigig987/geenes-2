@@ -110,6 +110,7 @@ export default (body: HTMLElement) => {
 
     docFragment.appendChild(frame)
     const elm = document.createElement('single-color')
+    elm.setAttribute('name', title)
     console.log('plugin code')
       
     frame.querySelector('main')!.appendChild(elm)

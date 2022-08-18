@@ -1,4 +1,8 @@
 <style>
+  div {
+    display: flex;
+    flex-direction: column;
+  }
   label {
     text-align: center;
     font-weight: normal;
@@ -8,7 +12,13 @@
     border: 1px solid #666;
   }
 </style>
-<label>
-Pick a color
-<input type="color" name="base">
-</label>
+<div>
+  <label>
+  Pick a color
+  <input type="color" name="base">
+  </label>
+  <label>
+  Name it
+  <input type="text" name="color-name">
+  </label>
+</div>
