@@ -6,8 +6,10 @@ import { useInteractions } from './interactions';
 import { clamp, _requestAnimationFrame, now, randomNamedColor, uuidv4 } from '@/utilities/utilities';
 import { state } from '@/utilities/state';
 
-import Tree from '../tree';
+import Tree from '@/models/tree';
 import * as fileType from '../../config/fileType.json';
+
+import { getFileCtrl } from '@/controllers/files';
 
 export default (body: HTMLElement) => {
   const { x: originX, y: originY } = body.getBoundingClientRect();
@@ -57,8 +59,8 @@ export default (body: HTMLElement) => {
     world.moveAndZoom({x: value.world.pointX, y: value.world.pointY}, value.world.scale);
     children.forEach(child => {
       const { value, key } = child;
-      const { x,y,title,type,width,height } = value;
-      createFrame({ x, y }, { width, height }, { type, title, key });
+      const { x,y,title,type,width,height, originalKey } = value;
+      createFrame({ x, y }, { width, height }, { type, title, key, originalKey });
     });
   }
   const changeRoom = (room: string): void => {
@@ -80,7 +82,7 @@ export default (body: HTMLElement) => {
   const createFrame = (
     { x, y }: Coordinates,
     { width, height }: { width: number, height: number}, 
-    { type, title, key }: { type:string, title: string, key:string}
+    { type, title, key, originalKey }: { type:string, title: string, key:string, originalKey: string}
     ) => {
 
     let docFragment: DocumentFragment = document.createDocumentFragment();
@@ -107,8 +109,15 @@ export default (body: HTMLElement) => {
     }
 
     docFragment.appendChild(frame)
-
+    const elm = document.createElement('single-color')
+    elm.setAttribute('name', title)
+    console.log('plugin code')
+      
+    frame.querySelector('main')!.appendChild(elm)
+      
     world.wrapper.appendChild(docFragment);
+
+    return frame
   }
 
   const checkTabsNumber = () => {
@@ -130,13 +139,13 @@ export default (body: HTMLElement) => {
       rootKey = key;
     }
     onAdd(_parent: string, key: string, value: any) {
-      const { type, x, y, width, height, title } = value;
-      console.log(value)
+      const { type, x, y, width, height, title, originalKey } = value;
       if (type === 'room') {
         renderRoomTab(key);
         lastRoomkey = key;
       } else {
-        createFrame({ x, y }, {width, height}, { type, title, key });
+        createFrame({ x, y }, {width, height}, { type, title, key, originalKey });
+
       }
       checkTabsNumber();
     }
@@ -156,6 +165,20 @@ export default (body: HTMLElement) => {
 
   changeRoom(lastRoomkey);
 
+  const fileCtrl = getFileCtrl();
+  const observeFiles = new class {
+    onInit(key: number): void{
+    }
+    onRemove(key: string): void{
+      for (let node of rooms.preOrderTraversal()) {
+        if (node.value!.originalKey === key) {
+          rooms.remove(node.key)
+        }
+      }
+      
+    }
+  }
+  fileCtrl?.addClient(observeFiles);
   // /// TRANSFORMATIONS 
 
   // let smallestAlreadyRemoved : boolean = false
@@ -236,7 +259,6 @@ export default (body: HTMLElement) => {
 
     e.preventDefault();
     const target = e.target as HTMLElement;
-    console.log('mouse down', target)
 
     const { pointX, pointY, scale } = world.getProperties();
     if (m.getCurrent() === modeOptions.PAN) {
@@ -267,7 +289,6 @@ export default (body: HTMLElement) => {
     interactions.endRotate()
     const target = interactions.getTarget();
     const targetKey = target!.getAttribute('data-key');
-    console.log(targetKey);
     const { width, height, top, left } = target.style;
     if (targetKey)
       rooms.update(targetKey, {x: parseFloat(left), y: parseFloat(top), width: parseFloat(width), height: parseFloat(height)})
@@ -431,7 +452,6 @@ export default (body: HTMLElement) => {
       el = el.parentElement ? el.parentElement : el
     }
     const { x, y, width, height } = el.getBoundingClientRect()
-    console.log(el, el.getBoundingClientRect())
     const { pointX, pointY, scale } = world.getProperties()
     const a = getComputedStyle(el).getPropertyValue('--angle')
     let n
@@ -484,12 +504,10 @@ export default (body: HTMLElement) => {
   }
 
   const deselectElement = (_el: HTMLElement) => {
-    console.log('PDDD')
     interactions.clean()
     // prevClickedElement
   }
 
-  body.addEventListener('resize', () => console.log('heey'));
 
   /// RENDERING (optional)
   let previousTime = now();
@@ -511,7 +529,6 @@ export default (body: HTMLElement) => {
     const { coord, content: keys } = (e as CustomEvent).detail;
     const tree = new Tree(new class {
       onInit(key: number) {
-        console.log('tree ready')
       }
     });
 

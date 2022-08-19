@@ -13,3 +13,7 @@
 .flow-v > * + * {
   margin-top: var(--spacing, 1em);
 }
+
+single-color {
+  color: red
+}

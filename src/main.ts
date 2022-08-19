@@ -1,13 +1,16 @@
-import './style.css'
+import '@/style/style.css'
 import '@/utilities/utility.css'
 import './reactivity.css'
 
-import ModeModel from './models/mode';
-import blueprint from './modules/blueprint/blueprint';
-import './modules/blueprint/blueprint.css';
+import ModeModel from '@/models/mode';
+import blueprint from '@/modules/blueprint/blueprint';
+import '@/modules/blueprint/blueprint.css';
 
 import { state }  from '@/utilities/state';
 import { randomNamedColor } from '@/utilities/utilities';
+
+import pluginLoader from '@/utilities/pluginLoader'
+import { loadFiles } from '@/controllers/files'
 
 interface Forms { [key: string]: any }
 
@@ -53,10 +56,16 @@ const loadBlueprint = (): void => {
   blueprint(container!);
 }
 
-const firstLoad = (): void => {
-  setOverlay();
-  resizeProjectNameField();
-  loadBlueprint();
+const firstLoad = async (): Promise<void> => {
+  const plugins = await pluginLoader()
+  setOverlay()
+  resizeProjectNameField()
+  handleNavigation()
+  loadFiles()
+  // TODO Add a functionality to load files independently from files-handler (which is not yet loaded here)
+  // The files, and so the plugins which are their master components must be loaded very early
+  // and be available regardless of the main navigation tab selected.
+  loadBlueprint()
 }
 
 
@@ -104,29 +113,29 @@ document.body.addEventListener('submit', e => e.preventDefault(), {capture: true
 
 
 // Navigation
-
-const form = forms.navigation;
-form!.elements.main.forEach((radio: HTMLFormElement) => {
-  radio.onchange = form!.onsubmit = () => modeCtrl.changeMode(Object.fromEntries(new FormData(form) as any)['main']);
-}); 
-
-const modeCtrl = new ModeModel(new class {
-  async onChange(value: string, _old: string) {
-    console.log(value)
-    form!.elements.main.value = value;
-
-    let template;
-    let code;
-    if (value === 'files') {
-      template = await import(`./modules/files-handler.html?raw`);
-      code = await import(`./modules/files-handler`);
-    } else {
-      return;
+const handleNavigation = () => {
+  const form = forms.navigation;
+  form!.elements.main.forEach((radio: HTMLFormElement) => {
+    radio.onchange = form!.onsubmit = () => modeCtrl.changeMode(Object.fromEntries(new FormData(form) as any)['main']);
+  }); 
+  
+  const modeCtrl = new ModeModel(new class {
+    async onChange(value: string, _old: string) {
+      form!.elements.main.value = value;
+  
+      let template;
+      let code;
+      if (value === 'files') {
+        template = await import(`./modules/files-handler.html?raw`);
+        code = await import(`./modules/files-handler`);
+      } else {
+        return;
+      }
+      form!.elements[value as string].innerHTML = template.default;//modules.get(value)[0];
+      code.default();
     }
-    form!.elements[value as string].innerHTML = template.default;//modules.get(value)[0];
-    code.default();
-  }
-});
+  });
+}
 
 // Footer
 const fpsCounter = document.querySelector('footer .fps-counter');
@@ -143,3 +152,4 @@ const renderActiveRoomName = () => {
 // Subscribe the render function to state changes
 window.subscribers.push(renderFpsCounter);
 window.subscribers.push(renderActiveRoomName);
+

@@ -1,0 +1,7 @@
+{
+  "author": "Gianluca Gini",
+  "id": "FILE_MEASURE",
+  "name": "Size",
+  "code": "./scripts/code.js",
+  "ui": "./index.html"
+}
