@@ -272,7 +272,7 @@ export const randomNamedColor = (seed: number | string): string => {
   return colorArray[rndInt()];
 }
 
-export const findColorName = (hex: string) => {
+export const findColorName = (_hex: string) => {
   // TODO, implement the real thing
   return 'white'
 }

@@ -8,11 +8,11 @@ export interface Data {
   
   type: DataType
 }
-export type key = string | number;
+export type key = string;
 
 export interface TreeModelObserver {
   onAdd?(parentNodeKey:  key, key: key, value: Data): void;
-  onInit(key: key): void;
+  onInit?(key: key): void;
   onMove?(parentNodeKey: key, key: key): void;
   onUpdate?(key: key, value: any): void;
   onRemove?(key: key): void;
@@ -63,14 +63,16 @@ export default class Tree {
           rootKey = key;
           this.root = new TreeNode(rootKey);
           this.#save();
-          client.onInit(rootKey);
+          if(client.onInit)
+            client.onInit(rootKey);
         } else {
           this.insert(parent, key, value)
         }
       });
     } else {
       this.#save();
-      client.onInit(rootKey);
+      if(client.onInit)
+        client.onInit(rootKey);
     }
     // this.addClient(client)
   }
@@ -117,14 +119,16 @@ export default class Tree {
           rootKey = key;
           this.root = new TreeNode(rootKey);
           this.#save();
-          client.onInit(rootKey);
+          if(client.onInit)
+            client.onInit(rootKey);
         } else {
           this.insertLocal(client, parent, key, value)
         }
       });
     } else {
       this.#save();
-      client.onInit(rootKey);
+      if(client.onInit)
+        client.onInit(rootKey);
     }
   }
 

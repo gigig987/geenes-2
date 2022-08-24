@@ -5,21 +5,21 @@ import * as fileType from '../config/fileType.json'
 import distortionMap from '@/api/distortionMap'
 
 declare global {
-  type FileTypes = keyof typeof fileType;
+  type FileType = keyof typeof fileType;
+  interface FileTypes {
+    types: Array<FileType>
+  }
 }
 
-interface Output {
-  types: Array<FileTypes>
-}
 
 interface Plugin {
-  id: FileTypes
+  id: FileType
   name: string
   description?: string
   author?: string
   code: string
   ui: string
-  output?: Output
+  output?: FileTypes
 }
 
 type GeenesPluginEvent = CustomEvent & {};

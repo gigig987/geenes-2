@@ -20,7 +20,7 @@ interface DropEvent {
     x: number;
     y: number;
   }
-  content: [string];
+  content: Array<string>;
 }
 export type draggableItem = HTMLFormElement;
 export interface draggableElements {
@@ -46,7 +46,7 @@ export default () => {
   
   const fileCtrl = getFileCtrl()
   const client = new class {
-    onInit(key: number): void{
+    onInit(key: string): void{
       // assign to the root element the root key
       const form = _.querySelector('ol')!.parentNode;
       if (form instanceof HTMLFormElement) {
@@ -736,8 +736,7 @@ export default () => {
   });
 
   forms['files-actions'].addEventListener('submit', ({submitter: {name}}: {submitter: HTMLFormElement}) => {
-    let parentKey: number | string = fileCtrl?.root.key; // root
-
+    let parentKey = fileCtrl?.root.key; // root
     if(selections.items.length) {
       const item = selections.items.reverse().find(item => item.getAttribute('data-drop'));
       item?.querySelector('details')!.setAttribute('open', '');
@@ -747,7 +746,7 @@ export default () => {
       forms['files-actions'].elements['show-file-type-menu'].checked = true;
       forms['files-actions'].elements['selected-cache'].value = parentKey;
     } else if (name === 'new-folder') {
-      fileCtrl?.insert(parentKey, self.crypto.randomUUID(), {type: 'FOLDER', title: ''});
+      fileCtrl?.insert(parentKey!, self.crypto.randomUUID(), {type: 'FOLDER', title: ''});
     }
   });
 

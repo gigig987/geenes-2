@@ -2,16 +2,16 @@
 const { get: ShadowRootHostGetter } = Object.getOwnPropertyDescriptor(
   ShadowRoot.prototype,
   "host"
-);
+)!;
 
 const { get: innerHTMLGetter } = Object.getOwnPropertyDescriptor(
  Element.prototype,
  'innerHTML'
-);
+)!;
 const { set: innerHTMLSetter } = Object.getOwnPropertyDescriptor(
  Element.prototype,
  'innerHTML'
-);
+)!;
 const { assignedNodes, assignedElements } = HTMLSlotElement.prototype;
 
 const distortionMap = new Map();

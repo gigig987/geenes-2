@@ -55,7 +55,9 @@ export default (body: HTMLElement) => {
     tabs?.appendChild(template!);
   }
   const loadRoom = (room: string) => {
-    const { children, value } = rooms.find(room);
+    const node = rooms.find(room);
+    if (!node) { return }
+    const { children, value } = node
     world.moveAndZoom({x: value.world.pointX, y: value.world.pointY}, value.world.scale);
     children.forEach(child => {
       const { value, key } = child;
@@ -82,7 +84,7 @@ export default (body: HTMLElement) => {
   const createFrame = (
     { x, y }: Coordinates,
     { width, height }: { width: number, height: number}, 
-    { type, title, key, originalKey }: { type:string, title: string, key:string, originalKey: string}
+    { type, title, key }: { type:FileType, title: string, key:string, originalKey: string}
     ) => {
 
     let docFragment: DocumentFragment = document.createDocumentFragment();
@@ -98,7 +100,7 @@ export default (body: HTMLElement) => {
     frame.classList.add('frame');
     frame.setAttribute('draggable', '');
     frame.innerHTML = `
-      <label class="title" draggable text><span>${fileType[type]}</span>${title}</label>
+      <label class="title" draggable text><span>${fileType[type] as unknown as FileTypes}</span>${title}</label>
       <main class="clip-content">
       </main>
     `;
@@ -167,8 +169,6 @@ export default (body: HTMLElement) => {
 
   const fileCtrl = getFileCtrl();
   const observeFiles = new class {
-    onInit(key: number): void{
-    }
     onRemove(key: string): void{
       for (let node of rooms.preOrderTraversal()) {
         if (node.value!.originalKey === key) {
@@ -527,14 +527,13 @@ export default (body: HTMLElement) => {
 
   document.addEventListener('blueprintdrop', (e) => {
     const { coord, content: keys } = (e as CustomEvent).detail;
-    const tree = new Tree(new class {
-      onInit(key: number) {
-      }
-    });
+    const tree = new Tree(new class {});
 
     const { x, y } = world.getProjectedPoint({ x: coord.x - originX, y: coord.y - originY });
     keys.forEach((key: string) => {
-      const { value } = tree.find(key);
+      const node = tree.find(key)
+      if (!node) {return}
+      const { value } = node
       rooms.insert(state.activeRoom, uuidv4(), { originalKey: key, ...value, x: -x, y: -y });
     });
   });

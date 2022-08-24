@@ -57,7 +57,7 @@ const loadBlueprint = (): void => {
 }
 
 const firstLoad = async (): Promise<void> => {
-  const plugins = await pluginLoader()
+  await pluginLoader()
   setOverlay()
   resizeProjectNameField()
   handleNavigation()

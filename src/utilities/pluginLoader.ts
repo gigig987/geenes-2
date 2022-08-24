@@ -1,8 +1,8 @@
 import { registerPlugin, getAllPlugins } from '@/api/plugin'
-const plugins = import.meta.glob('@/plugins/*/manifest.json', { assert: {type: 'eager'}})
-
+const plugins = import.meta.glob('@/plugins/*/manifest.json',  { eager: true })
+console.log(plugins)
 interface Manifest {
-  id: FileTypes
+  id: FileType
   name: string
   description?: string
   author?: string
@@ -10,23 +10,33 @@ interface Manifest {
   ui: string
 }
 const load = async () => {
-  let keys = []
-  for (const key in plugins) {
-    keys.push(key)
-  }
-  for await (const key of keys) {
-    const mod = await plugins[key]()
-    const { code: c, ui: u} = mod
-    const uiPath = `${key.replace('manifest.json', '')}${u.replace('./', '')}?raw`
-    const codePath = `${key.replace('manifest.json', '')}${c.replace('./', '')}?raw`
-    const ui = await import(/* @vite-ignore */uiPath);
-    const code = await import(/* @vite-ignore */codePath);
-    registerPlugin({
-      ...mod as Manifest,
-      code: code.default,
-      ui: ui.default,
-    })
-  }
+  const mod = await import('@/plugins/color/manifest.json');
+  const ui = await import('@/plugins/color/ui.html?raw');
+  const code = await import('@/plugins/color/code.js?raw')
+  registerPlugin({
+    ...mod as Manifest,
+    code: code.default,
+    ui: ui.default,
+  })
+  // TODO understand how to bundle automatically these plugins
+  // let keys = []
+
+  // for (const key in plugins) {
+  //   keys.push(key)
+  // }
+  // for await (const key of keys) {
+  //   const mod = await plugins[key] as Manifest
+  //   const { code: c, ui: u} = mod
+  //   const uiPath = `${key.replace('manifest.json', '')}${u.replace('./', '')}?raw`
+  //   const codePath = `${key.replace('manifest.json', '')}${c.replace('./', '')}?raw`
+  //   const ui = await import(/* @vite-ignore */uiPath);
+  //   const code = await import(/* @vite-ignore */codePath);
+  //   registerPlugin({
+  //     ...mod as Manifest,
+  //     code: code.default,
+  //     ui: ui.default,
+  //   })
+  // }
 }
 
 export default async (): Promise<IterableIterator<string>> => {
