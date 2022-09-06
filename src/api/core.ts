@@ -109,7 +109,7 @@ const makeColor = (value: string, name?: string): Color => {
   color.hsl.original.h = hsl![0]
   color.hsl.original.s = hsl![1]
   color.hsl.original.l = hsl![2]
-  color.hsl.css = `hsla(${color.hsl.original.h}deg, ${color.hsl.original.s}%, ${color.hsl.original.l}%, ${color.opacity})`
+  color.hsl.css = `hsl(${color.hsl.original.h} ${color.hsl.original.s}% ${color.hsl.original.l}% / ${color.opacity})`
 
   // normalise hsl values 0 to 100
   color.hsl.norm._array =  [color.hsl.original.h / 360, color.hsl.original.s / 100, color.hsl.original.l / 100]

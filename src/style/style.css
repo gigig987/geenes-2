@@ -238,6 +238,11 @@ article#blueprint {
   isolation: isolate;
   height: 100%;
 }
+article#blueprint .frame label:before {
+  content: attr(data-icon);
+  display: inline-block;
+  position: relative;
+}
 
 .tabs .tab {
   display: inline-flex;

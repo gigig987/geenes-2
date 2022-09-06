@@ -31,7 +31,6 @@ export default (body: HTMLElement) => {
   const addRoom = () => rooms.insert(rootKey, uuidv4(), { type: 'room', world: world.getProperties() });
 
   form.elements['add-room'].onclick = addRoom;
-
   const renderRoomTab = (room: string, active?: string): void => {
     const tabs = document.getElementById('rooms-navigation');
     const template = ((
@@ -100,7 +99,7 @@ export default (body: HTMLElement) => {
     frame.classList.add('frame');
     frame.setAttribute('draggable', '');
     frame.innerHTML = `
-      <label class="title" draggable text><span>${fileType[type] as unknown as FileTypes}</span>${title}</label>
+      <label class="title" draggable text data-icon="${fileType[type] as unknown as FileTypes}">${title}</label>
       <main class="clip-content">
       </main>
     `;
@@ -120,6 +119,18 @@ export default (body: HTMLElement) => {
     world.wrapper.appendChild(docFragment);
 
     return frame
+  }
+  const updateFrame = (key: string, value: any) => {
+    const frame: HTMLDivElement = document.querySelector(`.frame[data-key="${key}"]`)!
+    if (!frame) { return }
+    const label: HTMLLabelElement = frame!.querySelector(`.title[text]`)!
+    const { x, y, width, height, title} = value
+    frame.style.position = "absolute";
+    frame.style.left = `${x}px`;
+    frame.style.top = `${y}px`;
+    frame.style.width = `${width || 200 }px`;
+    frame.style.height = `${height || 200}px`;
+    label.innerText = title
   }
 
   const checkTabsNumber = () => {
@@ -163,7 +174,14 @@ export default (body: HTMLElement) => {
       }
       checkTabsNumber();
     }
+    onUpdate(key: string, value: any) {
+      updateFrame(key, value)
+    }
   }, { storageKey: 'rooms' });
+
+  if (!rooms.root.children.length) {
+    addRoom();
+  }
 
   changeRoom(lastRoomkey);
 
@@ -176,6 +194,14 @@ export default (body: HTMLElement) => {
         }
       }
       
+    }
+    onUpdate(key: string, value: any): void{
+      for (let node of rooms.preOrderTraversal()) {
+        if (node.value!.originalKey === key) {
+          console.log(key, value)
+          rooms.update(node.key, {...value})
+        }
+      }
     }
   }
   fileCtrl?.addClient(observeFiles);
@@ -397,6 +423,24 @@ export default (body: HTMLElement) => {
     },
     { passive: false }
   );
+
+  body.ondblclick = (e: MouseEvent) => {
+  	const target = e.target as HTMLElement
+    if (target.hasAttribute('text')) {
+      console.log(target)
+      target.contentEditable = 'true'
+      target.focus()
+      target.onblur = () => {
+        target.removeAttribute('contentEditable')
+        const parentKey = target.parentElement?.dataset.key
+        if (parentKey) {
+          const node = rooms.find(parentKey)
+          fileCtrl?.update(node!.value!.originalKey, {title: target.innerText})
+        }
+      }
+
+    }
+  }
   // window.onclick = (e : MouseEvent) => {
   // 	console.log(e.target)
   // 	const target = e.target as HTMLElement
