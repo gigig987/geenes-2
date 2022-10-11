@@ -10,6 +10,7 @@ import Tree from '@/models/tree';
 import * as fileType from '../../config/fileType.json';
 
 import { getFileCtrl } from '@/controllers/files';
+import { getPlugin } from '@/api/plugin'
 
 export default (body: HTMLElement) => {
   const { x: originX, y: originY } = body.getBoundingClientRect();
@@ -110,7 +111,8 @@ export default (body: HTMLElement) => {
     }
 
     docFragment.appendChild(frame)
-    const elm = document.createElement('single-color')
+    const { elementName } = getPlugin(type)!
+    const elm = document.createElement(elementName)
     elm.setAttribute('name', title)
     console.log('plugin code')
       

@@ -132,6 +132,7 @@ document.body
 const setToken = (id: string, token : Token): void => {
   console.log('core set Token', token, id)
   tokens.set(id, token)
+  console.log(tokens)
 }
 const removeToken = (id: string): void => {
   tokens.delete(id)

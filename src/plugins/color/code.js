@@ -49,8 +49,6 @@ class SingleColor extends HTMLElement {
       setColorToken(`--${this.name}`, this.color);
     })
 
-    // document.body.innerHTML = '<div>uee</div>'
-
   }
 }
 

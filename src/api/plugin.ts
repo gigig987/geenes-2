@@ -13,7 +13,8 @@ declare global {
 
 
 interface Plugin {
-  id: FileType
+  id: FileType,
+  elementName: string,
   name: string
   description?: string
   author?: string

@@ -2,7 +2,8 @@ import { registerPlugin, getAllPlugins } from '@/api/plugin'
 const plugins = import.meta.glob('@/plugins/*/manifest.json',  { eager: true })
 console.log(plugins)
 interface Manifest {
-  id: FileType
+  id: FileType,
+  elementName: string,
   name: string
   description?: string
   author?: string
@@ -10,13 +11,21 @@ interface Manifest {
   ui: string
 }
 const load = async () => {
-  const mod = await import('@/plugins/color/manifest.json');
-  const ui = await import('@/plugins/color/ui.html?raw');
-  const code = await import('@/plugins/color/code.js?raw')
+  const modColor = await import('@/plugins/color/manifest.json');
+  const uiColor = await import('@/plugins/color/ui.html?raw');
+  const codeColor = await import('@/plugins/color/code.js?raw')
   registerPlugin({
-    ...mod as Manifest,
-    code: code.default,
-    ui: ui.default,
+    ...modColor as Manifest,
+    code: codeColor.default,
+    ui: uiColor.default,
+  })
+  const modDraw = await import('@/plugins/draw/manifest.json');
+  const uiDraw = await import('@/plugins/draw/ui.html?raw');
+  const codeDraw = await import('@/plugins/draw/code.js?raw')
+  registerPlugin({
+    ...modDraw as Manifest,
+    code: codeDraw.default,
+    ui: uiDraw.default,
   })
   // TODO understand how to bundle automatically these plugins
   // let keys = []

@@ -1,5 +1,6 @@
 {
   "id": "FILE_COLOR",
+  "elementName": "single-color",
   "name": "Color single",
   "description": "a simple test installation for the first plugin in Geenes",
   "author": "Gianluca Gini",
